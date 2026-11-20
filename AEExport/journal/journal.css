@@ -1,0 +1,648 @@
+/* ==========================================================================
+   The Aethereal Expanse — campaign journal stylesheet
+   Daggerheart · sky-sea piracy · ship's log on weathered parchment
+   --------------------------------------------------------------------------
+   Self-contained static CSS. Fonts load from Google Fonts if online; the
+   fallback stacks keep the journal readable offline. To go fully offline,
+   download "IM Fell English" / "IM Fell English SC" and replace the @import
+   with local @font-face rules.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap");
+
+/* ---------- 1. Design tokens ---------- */
+:root {
+  /* Night sky above the page */
+  --night:        #0b1620;
+  --night-mid:    #12303a;
+  --ether:        #5fd8c8;   /* Hope, links, aether glow */
+  --ether-dim:    #2f8f86;
+
+  /* Parchment and ink */
+  --parchment:    #e8d9b2;
+  --parchment-lo: #d3bf8c;
+  --parchment-edge: #8a6a36;
+  --ink:          #2a2017;
+  --ink-soft:     #5b4733;
+
+  /* Metal and wax */
+  --brass:        #b08a3e;
+  --brass-hi:     #e0c077;
+  --brass-lo:     #6e5421;
+  --fear:         #8a2230;   /* Fear, warnings, wax seal */
+  --fear-hi:      #c0485a;
+
+  /* Daggerheart domain colours */
+  --d-arcana:   #7b4fb0;
+  --d-blade:    #b33a3a;
+  --d-bone:     #8a8574;
+  --d-codex:    #2f7f9f;
+  --d-grace:    #c0678f;
+  --d-midnight: #3f4a8c;
+  --d-sage:     #4f8a4a;
+  --d-splendor: #c9a227;
+  --d-valor:    #c9702a;
+
+  /* Type */
+  --font-body:    "IM Fell English", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --font-display: "IM Fell English SC", "IM Fell English", "Palatino Linotype", Georgia, serif;
+
+  /* Scale (≈ 1.25) */
+  --step--1: 0.88rem;
+  --step-0:  1.125rem;
+  --step-1:  1.4rem;
+  --step-2:  1.75rem;
+  --step-3:  2.25rem;
+  --step-4:  3.1rem;
+
+  --measure: 66ch;
+  --radius:  3px;
+  --gap:     1.5rem;
+}
+
+/* ---------- 2. Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 1rem;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  color: var(--parchment);
+  background-color: var(--night);
+  /* Stars and an ether glow on the horizon, drawn in CSS only */
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1px 1px at 27% 62%, rgba(255,255,255,.5), transparent 60%),
+    radial-gradient(1.5px 1.5px at 41% 9%,  rgba(255,255,255,.6), transparent 60%),
+    radial-gradient(1px 1px at 58% 38%, rgba(255,255,255,.45), transparent 60%),
+    radial-gradient(1.5px 1.5px at 73% 14%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1px 1px at 86% 55%, rgba(255,255,255,.5), transparent 60%),
+    radial-gradient(1px 1px at 93% 27%, rgba(255,255,255,.55), transparent 60%),
+    radial-gradient(ellipse 120% 60% at 50% 105%, rgba(95,216,200,.20), transparent 70%),
+    linear-gradient(180deg, var(--night) 0%, var(--night-mid) 100%);
+  background-attachment: fixed;
+}
+
+img, svg { max-width: 100%; height: auto; }
+
+a {
+  color: var(--ether);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color .15s ease;
+}
+a:hover { color: var(--brass-hi); }
+
+:focus-visible {
+  outline: 2px solid var(--ether);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection { background: var(--ether-dim); color: #fff; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem; top: -4rem;
+  padding: .5rem 1rem;
+  background: var(--brass);
+  color: var(--ink);
+  z-index: 100;
+}
+.skip-link:focus { top: 1rem; }
+
+/* ---------- 3. Page frame ---------- */
+.page {
+  width: min(100% - 2rem, 70rem);
+  margin-inline: auto;
+}
+
+.site-header {
+  padding-block: 2.5rem 1rem;
+  text-align: center;
+}
+
+.site-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 6vw, var(--step-4));
+  line-height: 1.1;
+  letter-spacing: .02em;
+  color: var(--brass-hi);
+  text-shadow: 0 2px 0 var(--brass-lo), 0 0 28px rgba(95,216,200,.25);
+}
+
+.site-tagline {
+  margin: .5rem 0 0;
+  font-style: italic;
+  color: var(--ether);
+  opacity: .9;
+}
+
+/* A rope-and-brass rule used between major parts of the page */
+.rule {
+  display: block;
+  height: 10px;
+  margin: 1.5rem auto;
+  border: 0;
+  background:
+    repeating-linear-gradient(115deg, var(--brass) 0 6px, var(--brass-lo) 6px 12px);
+  border-radius: 5px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.2);
+  opacity: .85;
+  max-width: 28rem;
+}
+
+/* Navigation: a row of brass plates */
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-nav a {
+  display: block;
+  padding: .35rem 1rem;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  color: var(--ink);
+  text-decoration: none;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-lo));
+  border: 1px solid var(--brass-lo);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 0 rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: #000;
+  background: linear-gradient(180deg, #f1d891, var(--brass-hi) 55%, var(--brass));
+}
+
+main { padding-block: 1rem 3rem; }
+
+.site-footer {
+  padding-block: 2rem 3rem;
+  text-align: center;
+  font-size: var(--step--1);
+  font-style: italic;
+  color: rgba(232,217,178,.65);
+}
+
+/* ---------- 4. Parchment pages (journal entries) ---------- */
+.entry {
+  position: relative;
+  max-width: 48rem;
+  margin: 2rem auto;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.35), transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(120,80,30,.22), transparent 60%),
+    linear-gradient(170deg, var(--parchment), var(--parchment-lo));
+  border-radius: var(--radius);
+  /* burnt, uneven edges + a shadow so the page rests on the dark sea */
+  box-shadow:
+    inset 0 0 0 1px rgba(110,84,33,.5),
+    inset 0 0 45px rgba(110,70,20,.55),
+    0 14px 30px rgba(0,0,0,.55);
+}
+
+.entry > :first-child { margin-top: 0; }
+.entry > :last-child  { margin-bottom: 0; }
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 2rem 0 .6rem;
+}
+.entry h1, .entry h2, .entry h3, .entry h4 { color: var(--ink); }
+h1 { font-size: var(--step-3); }
+h2 { font-size: var(--step-2); }
+h3 { font-size: var(--step-1); }
+h4 { font-size: var(--step-0); font-style: italic; }
+
+.entry h2 {
+  padding-bottom: .3rem;
+  border-bottom: 2px solid var(--brass);
+  border-image: linear-gradient(90deg, var(--brass-lo), var(--brass), transparent) 1;
+}
+
+/* Section headings on the dark background */
+.section-title {
+  margin: 3rem 0 .4rem;
+  text-align: center;
+  font-size: var(--step-3);
+  color: var(--brass-hi);
+  text-shadow: 0 2px 0 var(--brass-lo);
+}
+.section-intro {
+  max-width: var(--measure);
+  margin: 0 auto 2rem;
+  text-align: center;
+  font-style: italic;
+}
+
+p, ul, ol, dl, table, figure, blockquote { margin: 0 0 1.1rem; }
+.entry p, .entry li { max-width: var(--measure); hanging-punctuation: first; }
+.entry p { text-wrap: pretty; }
+
+ul, ol { padding-left: 1.4rem; }
+li + li { margin-top: .25rem; }
+
+strong, b { font-weight: 400; color: #000; text-shadow: .4px 0 0 currentColor; }
+em, i     { font-style: italic; }
+
+/* Date line under an entry title */
+.entry-date {
+  margin: -.2rem 0 1.4rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Drop cap — apply with class="lede" on the first paragraph of an entry */
+.lede::first-letter {
+  float: left;
+  margin: .08em .12em 0 0;
+  padding: .02em .1em 0;
+  font-family: var(--font-display);
+  font-size: 3.6em;
+  line-height: .85;
+  color: var(--fear);
+  text-shadow: 1px 1px 0 rgba(0,0,0,.25);
+}
+
+/* Scene break */
+.scene-break {
+  margin: 1.8rem 0;
+  border: 0;
+  text-align: center;
+  height: 1.5rem;
+  color: var(--brass-lo);
+  overflow: visible;
+}
+.scene-break::before { content: "\2766"; font-size: 1.4rem; }
+
+/* ---------- 5. Journal components ---------- */
+
+/* Read-aloud text */
+.read-aloud,
+blockquote {
+  position: relative;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  font-style: italic;
+  background: rgba(255,255,255,.22);
+  border-left: 4px solid var(--brass);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.read-aloud > :last-child,
+blockquote > :last-child { margin-bottom: 0; }
+blockquote cite {
+  display: block;
+  margin-top: .4rem;
+  font-style: normal;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+blockquote cite::before { content: "\2014\00a0"; }
+
+/* Callouts: GM notes, Hope moments, Fear moves */
+.callout {
+  margin: 1.5rem 0;
+  padding: .9rem 1.2rem 1rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: var(--radius);
+  background: rgba(60,40,15,.07);
+}
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child  { margin-bottom: 0; }
+.callout-title {
+  display: block;
+  margin: 0 0 .3rem;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+}
+
+.callout--gm   { border-style: dashed; }
+.callout--hope { border-color: var(--ether-dim); background: rgba(47,143,134,.12); }
+.callout--hope .callout-title { color: #1c6a63; }
+.callout--fear { border-color: var(--fear); background: rgba(138,34,48,.1); }
+.callout--fear .callout-title { color: var(--fear); }
+
+/* Foundry "secret" blocks, if present in the exported HTML */
+section.secret {
+  margin: 1.5rem 0;
+  padding: .9rem 1.2rem;
+  border: 1.5px dashed var(--ink-soft);
+  background: rgba(60,40,15,.07);
+}
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin-bottom: 1.2rem; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+caption {
+  padding-bottom: .4rem;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+}
+th, td {
+  padding: .45rem .7rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(91,71,51,.4);
+}
+thead th {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--parchment);
+  background: var(--ink);
+  border-bottom: 3px double var(--brass);
+}
+tbody tr:nth-child(even) { background: rgba(255,255,255,.18); }
+
+/* Images */
+figure { text-align: center; }
+figure img {
+  border: 6px solid var(--parchment);
+  outline: 1px solid var(--brass-lo);
+  box-shadow: 0 6px 14px rgba(0,0,0,.4);
+}
+figcaption {
+  margin-top: .5rem;
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+/* Chips (domains, tags, ancestries) */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chip {
+  --c: var(--brass-lo);
+  display: inline-block;
+  padding: .05rem .6rem .05rem .5rem;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  color: var(--ink);
+  background: rgba(255,255,255,.35);
+  border: 1px solid var(--c);
+  border-left-width: 5px;
+  border-radius: 2px;
+}
+.chip--arcana   { --c: var(--d-arcana); }
+.chip--blade    { --c: var(--d-blade); }
+.chip--bone     { --c: var(--d-bone); }
+.chip--codex    { --c: var(--d-codex); }
+.chip--grace    { --c: var(--d-grace); }
+.chip--midnight { --c: var(--d-midnight); }
+.chip--sage     { --c: var(--d-sage); }
+.chip--splendor { --c: var(--d-splendor); }
+.chip--valor    { --c: var(--d-valor); }
+
+/* ---------- 6. Character cards ("ship's articles") ---------- */
+.crew {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.character {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.6rem 1.4rem 1.3rem;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 15% 5%, rgba(255,255,255,.35), transparent 55%),
+    linear-gradient(170deg, var(--parchment), var(--parchment-lo));
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 0 0 1px rgba(110,84,33,.5),
+    inset 0 0 38px rgba(110,70,20,.5),
+    0 12px 24px rgba(0,0,0,.5);
+}
+
+/* Brass rivets in the four corners */
+.character::before,
+.character::after {
+  content: "";
+  position: absolute;
+  top: 9px; bottom: 9px; left: 9px; right: 9px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle 4px at 0 0,       var(--brass-hi) 30%, var(--brass-lo) 75%, transparent 78%),
+    radial-gradient(circle 4px at 100% 0,    var(--brass-hi) 30%, var(--brass-lo) 75%, transparent 78%),
+    radial-gradient(circle 4px at 0 100%,    var(--brass-hi) 30%, var(--brass-lo) 75%, transparent 78%),
+    radial-gradient(circle 4px at 100% 100%, var(--brass-hi) 30%, var(--brass-lo) 75%, transparent 78%);
+  background-repeat: no-repeat;
+}
+.character::after { display: none; }
+
+/* Medallion with the character's initial — a brass ring, ether-lit centre */
+.medallion {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 4.6rem;
+  height: 4.6rem;
+  margin: 0 auto .6rem;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--brass-hi);
+  background:
+    radial-gradient(circle at 35% 30%, var(--ether-dim), var(--night) 75%);
+  border-radius: 50%;
+  border: 4px solid var(--brass);
+  box-shadow:
+    0 0 0 2px var(--brass-lo),
+    inset 0 0 14px rgba(0,0,0,.7),
+    0 3px 6px rgba(0,0,0,.5);
+  text-shadow: 0 0 10px rgba(95,216,200,.7);
+}
+
+/* If you use a real portrait instead: <img class="medallion" ...> */
+img.medallion { object-fit: cover; padding: 0; }
+
+.character-name {
+  margin: 0;
+  text-align: center;
+  font-size: var(--step-1);
+  line-height: 1.15;
+}
+.character-epithet {
+  margin: .15rem 0 .8rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.character-heritage {
+  margin: 0 0 .7rem;
+  text-align: center;
+  font-size: var(--step--1);
+}
+.character-heritage strong { text-shadow: none; }
+
+.character .chips { justify-content: center; margin-bottom: 1rem; }
+
+/* Vital stats */
+.vitals {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: .5rem .9rem;
+  margin: 0 0 1rem;
+  padding: .8rem 0;
+  border-block: 1px solid rgba(91,71,51,.45);
+}
+.vitals > div { display: flex; flex-direction: column; gap: .15rem; }
+.vitals dt {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.vitals dd { margin: 0; font-family: var(--font-display); font-size: var(--step-1); line-height: 1.1; }
+
+/* Pip tracks: Hit Points, Stress, Hope */
+.track { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; }
+.pip {
+  width: .85rem;
+  height: .85rem;
+  border: 1.5px solid var(--ink-soft);
+  border-radius: 3px;
+  background: rgba(255,255,255,.3);
+}
+.pip.is-full { background: var(--fear); border-color: #4d121b; }
+.track--stress .pip.is-full { background: var(--d-midnight); border-color: #232a55; }
+.track--hope .pip { border-radius: 50%; }
+.track--hope .pip.is-full {
+  background: radial-gradient(circle at 35% 30%, #aef3ea, var(--ether-dim));
+  border-color: #1c6a63;
+}
+
+/* Six traits */
+.traits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .4rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+}
+.traits li {
+  margin: 0;
+  padding: .3rem .2rem .35rem;
+  background: rgba(255,255,255,.28);
+  border: 1px solid rgba(91,71,51,.4);
+  border-radius: 2px;
+  font-size: var(--step--1);
+  line-height: 1.2;
+}
+.traits li > span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  line-height: 1.1;
+}
+.traits .is-neg > span { color: var(--fear); }
+
+.character-bio {
+  margin: 0 0 .9rem;
+  font-size: var(--step--1);
+  line-height: 1.55;
+}
+
+/* Expandable details at the bottom of a card */
+.character details {
+  margin-top: auto;
+  border-top: 1px solid rgba(91,71,51,.45);
+  padding-top: .6rem;
+  font-size: var(--step--1);
+}
+.character summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  color: var(--fear);
+  list-style: none;
+}
+.character summary::-webkit-details-marker { display: none; }
+.character summary::before { content: "\25B8\00a0"; }
+.character details[open] summary::before { content: "\25BE\00a0"; }
+.character details ul { margin: .5rem 0 0; padding-left: 1.1rem; }
+
+/* ---------- 7. Utilities ---------- */
+.text-center { text-align: center; }
+.mt-0 { margin-top: 0; }
+
+/* ---------- 8. Responsive ---------- */
+@media (max-width: 36rem) {
+  :root { --step-0: 1.05rem; }
+  .site-header { padding-top: 1.5rem; }
+  .entry { margin-inline: -.5rem; }
+}
+
+/* ---------- 9. Motion & contrast preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; scroll-behavior: auto !important; }
+}
+
+@media (prefers-contrast: more) {
+  body { background-image: none; }
+  .entry, .character { box-shadow: inset 0 0 0 2px var(--ink); }
+}
+
+/* ---------- 10. Print: plain ink on paper ---------- */
+@media print {
+  body { color: #000; background: #fff; }
+  .site-nav, .skip-link, .rule { display: none; }
+  .site-title, .section-title { color: #000; text-shadow: none; }
+  .entry, .character {
+    box-shadow: none;
+    background: none;
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+  .character::before { display: none; }
+  .character details { display: block; }
+  a { color: #000; }
+}
