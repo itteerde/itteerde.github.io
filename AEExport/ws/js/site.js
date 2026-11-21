@@ -40,6 +40,11 @@
   const sJs = document.createElement('script');
   sJs.type = 'module'; sJs.src = url('pagefind/pagefind-component-ui.js');
   sJs.onload = () => {
+    // Tell Pagefind where the site lives (auto-detection fails for injected scripts and falls back to "/pagefind/").
+    const cfg = document.createElement('pagefind-config');
+    cfg.setAttribute('bundle-path', new URL(url('pagefind/'), document.baseURI).pathname);
+    cfg.setAttribute('base-url', new URL(url('./'), document.baseURI).pathname);
+    document.body.append(cfg);
     const slot = () => { const d = document.createElement('div'); d.className = 'search-slot';
       d.innerHTML = '<pagefind-modal-trigger></pagefind-modal-trigger>'; return d; };
     nav.querySelector('.brand').after(slot());
