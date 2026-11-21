@@ -1,0 +1,145 @@
+/* ==========================================================================
+   The Aetherial Expanse – "Black Tide" theme (Daggerheart campaign site)
+   Pirates-of-the-Caribbean look: ship's timber, brass, deep sea, parchment.
+   One stylesheet for every page type. Fonts: add IM Fell via <link> if you
+   like; the stacks below fall back to system serifs, so it works offline.
+   ========================================================================== */
+:root{
+  --sea-0:#07151c; --sea-1:#0d2630; --sea-2:#14404a; --teal:#2f7f7a; --verdigris:#6fbfb0;
+  --wood:#2b1a10; --wood-2:#46301b; --brass:#c9a24b; --brass-hi:#f0d589; --brass-lo:#7d6226;
+  --parch:#efe0b8; --parch-2:#dcc48c; --ink:#2a1d12; --ink-soft:#5b4630;
+  --blood:#8f1d1d; --blood-hi:#b8322a;
+  --font-head:"IM Fell English SC","Copperplate","Copperplate Gothic Light","Palatino Linotype",Palatino,Georgia,serif;
+  --font-body:"IM Fell English","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+  --nav-w:17rem; --sheet-w:62rem;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;font:1.1rem/1.7 var(--font-body);color:var(--parch);
+  background:radial-gradient(ellipse at 15% -10%,rgba(111,191,176,.2),transparent 55%),
+             radial-gradient(ellipse at 95% 110%,rgba(143,29,29,.22),transparent 50%),
+             linear-gradient(180deg,var(--sea-1),var(--sea-0)) fixed}
+body.nav-open{overflow:hidden}
+a{color:var(--blood);text-underline-offset:.15em;text-decoration-thickness:1px}
+a:hover{color:var(--blood-hi)}
+:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+.skip{position:absolute;left:-99rem;top:0;z-index:99;background:var(--brass);color:var(--ink);padding:.5rem 1rem}
+.skip:focus{left:0}
+
+/* ---- Type ---- */
+h1,h2,h3,h4{font-family:var(--font-head);line-height:1.2;letter-spacing:.03em;font-weight:700;margin:1.6rem 0 .5rem}
+h1{font-size:clamp(2rem,4.5vw,3.1rem);margin-top:.2rem}
+h2{font-size:1.6rem;padding-bottom:.35rem;border-bottom:1px solid var(--brass-lo)}
+h2::after{content:"";display:block;width:4rem;height:3px;background:var(--blood);margin-top:.35rem}
+h3{font-size:1.25rem;color:var(--blood)}
+p,ul,ol,dl{margin:0 0 1rem}
+blockquote{margin:1.4rem 0;padding:.4rem 1.2rem;border-left:4px solid var(--blood);font-style:italic;color:var(--ink-soft)}
+blockquote cite{display:block;font-style:normal;font-size:.9rem;margin-top:.3rem}
+.ornament{text-align:center;color:var(--brass-lo);margin:1.8rem 0;letter-spacing:.9em}
+
+/* ---- Shell: ship's-timber nav + content ---- */
+.site{display:grid;grid-template-columns:var(--nav-w) minmax(0,1fr);min-height:100vh}
+.nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:1.4rem 1rem;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.14) 0 2px,transparent 2px 11px),
+             linear-gradient(90deg,var(--wood),var(--wood-2));
+  border-right:3px double var(--brass-lo);box-shadow:4px 0 14px rgba(0,0,0,.5)}
+.nav .brand{display:block;text-align:center;font:700 1.45rem/1.15 var(--font-head);color:var(--brass-hi);
+  text-decoration:none;padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px double var(--brass-lo)}
+.brand small{display:block;font:italic .85rem var(--font-body);color:var(--verdigris);margin:.2rem 0}
+.nav ul{list-style:none;margin:0;padding:0}
+.nav a{display:block;padding:.45rem .8rem;color:var(--parch);text-decoration:none;font-family:var(--font-head);
+  letter-spacing:.04em;border-left:3px solid transparent}
+.nav a:hover{background:rgba(0,0,0,.3);color:var(--brass-hi)}
+.nav [aria-current=page]{border-left-color:var(--brass);background:rgba(0,0,0,.4);color:var(--brass-hi)}
+.nav li li a{padding-left:1.8rem;font:1rem var(--font-body)}
+.content{padding:clamp(1rem,3vw,2.5rem);min-width:0}
+.topbar,.scrim{display:none}
+
+/* ---- The parchment sheet ---- */
+.sheet{max-width:var(--sheet-w);margin:0 auto;padding:clamp(1.2rem,4vw,3rem);color:var(--ink);border-radius:.25rem;
+  background:radial-gradient(ellipse at 50% 0,rgba(255,255,255,.4),transparent 65%),linear-gradient(var(--parch),var(--parch-2));
+  box-shadow:inset 0 0 3.5rem rgba(90,60,20,.5),0 0 0 3px var(--wood),0 0 0 5px var(--brass),0 1.4rem 2.6rem rgba(0,0,0,.6)}
+.foot{max-width:var(--sheet-w);margin:1.5rem auto 0;text-align:center;font-size:.85rem;color:var(--verdigris)}
+.crumbs{list-style:none;padding:0;margin:0 0 1rem;display:flex;flex-wrap:wrap;gap:.2rem .5rem;font-size:.9rem;color:var(--ink-soft)}
+.crumbs li+li::before{content:"›";margin-right:.5rem}
+.hero{text-align:center;padding:.5rem 0 0}
+.hero p{font-style:italic;color:var(--ink-soft);font-size:1.2rem}
+.prose{max-width:42rem;margin-inline:auto}
+.dropcap>p:first-of-type::first-letter{float:left;font:700 3.8rem/.8 var(--font-head);color:var(--blood);padding:.12em .1em 0 0}
+
+/* ---- Cards, tags, buttons ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1.2rem;margin:1.2rem 0;padding:0;list-style:none}
+.card{display:block;padding:1rem 1.2rem;color:inherit;text-decoration:none;background:rgba(255,255,255,.26);
+  border:1px solid var(--brass-lo);border-radius:.3rem;box-shadow:0 2px 0 rgba(60,35,10,.25)}
+a.card:hover{border-color:var(--blood);box-shadow:0 8px 16px rgba(60,35,10,.35)}
+.card h3{margin:0 0 .3rem}
+.card p{margin:0;font-size:.95rem}
+.card.is-empty{opacity:.6;border-style:dashed}
+.tag{display:inline-block;padding:0 .7rem;border:1px solid var(--brass-lo);border-radius:2rem;font-size:.85rem;background:rgba(201,162,75,.25)}
+.btn{display:inline-block;padding:.5rem 1.2rem;font-family:var(--font-head);color:var(--parch);text-decoration:none;
+  background:linear-gradient(var(--blood-hi),var(--blood));border:2px solid var(--wood);border-radius:.3rem;box-shadow:0 2px 0 var(--wood)}
+.btn:hover{color:#fff;filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--brass-lo);box-shadow:none}
+.btn[aria-disabled=true]{opacity:.4;pointer-events:none;filter:grayscale(1)}
+.pager{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:2.5rem;padding-top:1rem;border-top:3px double var(--brass-lo)}
+
+/* ---- Portrait page (player characters) ---- */
+.portrait-layout{display:grid;grid-template-columns:minmax(14rem,18rem) minmax(0,1fr);gap:2rem;align-items:start}
+.portrait{margin:0;padding:.6rem;background:var(--wood);border:3px solid var(--brass);outline:2px solid var(--wood);
+  box-shadow:0 .8rem 1.4rem rgba(0,0,0,.45);position:sticky;top:1rem}
+.portrait img,.portrait .frame{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border:2px solid var(--brass-lo)}
+.portrait .frame{display:grid;place-items:center;font:700 4.5rem var(--font-head);color:var(--brass-hi);
+  background:radial-gradient(circle at 50% 35%,var(--sea-2),var(--sea-0))}
+.portrait figcaption{padding:.6rem .2rem .1rem;text-align:center;font-family:var(--font-head);color:var(--brass-hi)}
+.traits{display:grid;grid-template-columns:repeat(auto-fit,minmax(6.5rem,1fr));gap:.7rem;padding:0;list-style:none}
+.trait{text-align:center;padding:.4rem;border:2px solid var(--brass-lo);border-radius:.5rem;background:rgba(255,255,255,.3)}
+.trait b{display:block;font:700 1.9rem/1.2 var(--font-head);color:var(--blood)}
+.trait span{font-size:.95rem}
+.stats{display:grid;grid-template-columns:auto 1fr;gap:.45rem 1.2rem;align-items:center}
+.stats dt{font-family:var(--font-head);font-weight:700}
+.stats dd{margin:0}
+.pips{display:inline-flex;flex-wrap:wrap;gap:.45rem}
+.pip{width:1rem;height:1rem;border:2px solid var(--ink);transform:rotate(45deg)}
+.pip.on{background:var(--blood)}
+.pips.hope .pip.on{background:var(--brass)}
+.pips.stress .pip.on{background:var(--teal)}
+
+/* ---- Journals, session logs ---- */
+.meta{display:flex;flex-wrap:wrap;gap:.3rem 1.6rem;margin:.6rem 0 1.4rem;padding:.5rem 0;border-block:1px solid var(--brass-lo);font-size:.95rem;color:var(--ink-soft)}
+.timeline{list-style:none;margin:1.5rem 0;padding:0 0 0 1.8rem;border-left:3px double var(--brass-lo)}
+.timeline li{position:relative;margin:0 0 1.3rem}
+.timeline li::before{content:"";position:absolute;left:-2.5rem;top:.55rem;width:.8rem;height:.8rem;transform:rotate(45deg);background:var(--blood);border:2px solid var(--ink)}
+.timeline time{display:block;font-size:.9rem;color:var(--ink-soft)}
+.timeline a{font:700 1.2rem var(--font-head)}
+.diary{font-style:italic}
+
+/* ---- Asides, tables, spoilers, TOC ---- */
+.note{margin:1.2rem 0;padding:.7rem 1rem;border-left:5px solid var(--teal);background:rgba(47,127,122,.14)}
+.note.danger{border-color:var(--blood);background:rgba(143,29,29,.1)}
+.note>strong:first-child{font-family:var(--font-head)}
+.spoiler{background:var(--ink);color:transparent;border-radius:.2rem;padding:0 .3rem;cursor:pointer;transition:background .2s,color .2s}
+.spoiler.revealed{background:transparent;color:inherit}
+.toc{margin:1.2rem 0;padding:.8rem 1.4rem;border:1px solid var(--brass-lo);background:rgba(255,255,255,.25)}
+.toc ol{margin:.3rem 0 0}
+.table-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.98rem}
+th{background:var(--wood);color:var(--brass-hi);font-family:var(--font-head);text-align:left}
+th,td{padding:.45rem .8rem;border:1px solid var(--brass-lo)}
+tbody tr:nth-child(even){background:rgba(255,255,255,.2)}
+
+/* ---- Mobile: nav slides in from the left ---- */
+@media (max-width:60rem){
+  .site{grid-template-columns:1fr}
+  .topbar{display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:30;padding:.5rem .9rem;
+    background:var(--wood);border-bottom:3px double var(--brass-lo)}
+  .topbar .burger{font-size:1.5rem;line-height:1;padding:.2rem .6rem;color:var(--brass-hi);background:none;border:1px solid var(--brass-lo);border-radius:.3rem;cursor:pointer}
+  .topbar a{font:700 1.15rem var(--font-head);color:var(--brass-hi);text-decoration:none}
+  .nav{position:fixed;z-index:40;inset:0 auto 0 0;width:min(84vw,19rem);transform:translateX(-105%);transition:transform .25s}
+  .nav-open .nav{transform:none}
+  .nav-open .scrim{display:block;position:fixed;inset:0;z-index:35;background:rgba(0,0,0,.65)}
+  .portrait-layout{grid-template-columns:1fr}
+  .portrait{position:static;max-width:18rem;margin-inline:auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media print{.nav,.topbar,.scrim,.pager,.foot{display:none!important}.site{display:block}
+  body{background:#fff}.sheet{box-shadow:none;background:none}.portrait{position:static}}

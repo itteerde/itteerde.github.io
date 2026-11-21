@@ -1,0 +1,52 @@
+/* Aetherial Expanse – shared behaviour. Each page sets <body data-root="../"> (path back to the site root).
+   Edit NAV below once and every page gets the new menu. */
+(() => {
+  const root = document.body.dataset.root || '';
+  const NAV = [
+    ['Home', 'index.html'],
+    ['The Crew', 'characters/index.html', [['Isolde Varrow', 'characters/isolde-varrow.html']]],
+    ['Journals', 'journals/index.html', [['Captain’s Log', 'journals/captains-log.html'], ['Session 1: Landfall', 'journals/session-01.html']]],
+    ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]]
+  ];
+  const url = h => root + h;
+  const here = h => { const p = new URL(url(h), location.href).pathname;
+    return p === location.pathname || (location.pathname.endsWith('/') && p === location.pathname + 'index.html'); };
+  const cur = h => here(h) ? ' aria-current="page"' : '';
+
+  const nav = document.createElement('nav');
+  nav.className = 'nav'; nav.id = 'site-nav'; nav.setAttribute('aria-label', 'Main');
+  nav.innerHTML = `<a class="brand" href="${url('index.html')}"><small>A Daggerheart campaign</small>The Aetherial Expanse</a><ul>` +
+    NAV.map(([t, h, kids = []]) => `<li><a href="${url(h)}"${cur(h)}>${t}</a>` +
+      (kids.length && (here(h) || kids.some(k => here(k[1])))
+        ? '<ul>' + kids.map(([kt, kh]) => `<li><a href="${url(kh)}"${cur(kh)}>${kt}</a></li>`).join('') + '</ul>' : '') + '</li>').join('') + '</ul>';
+
+  const bar = document.createElement('header');
+  bar.className = 'topbar';
+  bar.innerHTML = `<button class="burger" aria-controls="site-nav" aria-expanded="false" aria-label="Open menu">☰</button><a href="${url('index.html')}">The Aetherial Expanse</a>`;
+  const scrim = document.createElement('div'); scrim.className = 'scrim';
+  document.querySelector('.site').prepend(scrim, nav, bar);
+
+  const burger = bar.querySelector('.burger');
+  const set = o => { document.body.classList.toggle('nav-open', o); burger.setAttribute('aria-expanded', o); };
+  burger.onclick = () => set(!document.body.classList.contains('nav-open'));
+  scrim.onclick = () => set(false);
+  nav.onclick = e => e.target.closest('a') && set(false);
+  addEventListener('keydown', e => e.key === 'Escape' && set(false));
+
+  // <span class="pips hope" data-max="6" data-on="4"></span> → diamond tracker
+  document.querySelectorAll('.pips').forEach(p => {
+    const m = +p.dataset.max, o = +p.dataset.on;
+    p.setAttribute('role', 'img'); p.setAttribute('aria-label', `${o} of ${m}`);
+    p.innerHTML = Array.from({ length: m }, (_, i) => `<i class="pip${i < o ? ' on' : ''}"></i>`).join('');
+  });
+  // <span class="spoiler">secret</span> → click / Enter to reveal
+  document.querySelectorAll('.spoiler').forEach(s => {
+    s.tabIndex = 0; s.setAttribute('role', 'button'); s.title = 'Reveal';
+    const f = () => s.classList.toggle('revealed');
+    s.onclick = f; s.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); f(); } };
+  });
+  // <div class="toc" data-toc></div> → contents list from .prose h2
+  const toc = document.querySelector('[data-toc]');
+  if (toc) toc.innerHTML = '<strong>Contents</strong><ol>' + [...document.querySelectorAll('.prose h2')]
+    .map((h, i) => { h.id = h.id || 's' + (i + 1); return `<li><a href="#${h.id}">${h.textContent}</a></li>`; }).join('') + '</ol>';
+})();
