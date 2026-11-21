@@ -9,8 +9,9 @@
     ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]]
   ];
   const url = h => root + h;
-  const here = h => { const p = new URL(url(h), location.href).pathname;
-    return p === location.pathname || (location.pathname.endsWith('/') && p === location.pathname + 'index.html'); };
+  // Compare paths without ".html", "index.html" or a trailing slash, so pretty-URL servers (serve, Netlify, Cloudflare Pages) still match.
+  const norm = p => p.replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/$/, '') || '/';
+  const here = h => norm(new URL(url(h), document.baseURI).pathname) === norm(location.pathname);
   const cur = h => here(h) ? ' aria-current="page"' : '';
 
   const nav = document.createElement('nav');
@@ -32,6 +33,20 @@
   scrim.onclick = () => set(false);
   nav.onclick = e => e.target.closest('a') && set(false);
   addEventListener('keydown', e => e.key === 'Escape' && set(false));
+
+  // Search (Pagefind). The trigger appears only if the index exists; build it with `npm run search` after every change.
+  const sCss = document.createElement('link');
+  sCss.rel = 'stylesheet'; sCss.href = url('pagefind/pagefind-component-ui.css');
+  const sJs = document.createElement('script');
+  sJs.type = 'module'; sJs.src = url('pagefind/pagefind-component-ui.js');
+  sJs.onload = () => {
+    const slot = () => { const d = document.createElement('div'); d.className = 'search-slot';
+      d.innerHTML = '<pagefind-modal-trigger></pagefind-modal-trigger>'; return d; };
+    nav.querySelector('.brand').after(slot());
+    bar.append(slot());
+    document.body.append(document.createElement('pagefind-modal'));
+  };
+  document.head.append(sCss, sJs);
 
   // <span class="pips hope" data-max="6" data-on="4"></span> → diamond tracker
   document.querySelectorAll('.pips').forEach(p => {

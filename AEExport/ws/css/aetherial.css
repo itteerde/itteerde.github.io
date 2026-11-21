@@ -127,6 +127,10 @@ th{background:var(--wood);color:var(--brass-hi);font-family:var(--font-head);tex
 th,td{padding:.45rem .8rem;border:1px solid var(--brass-lo)}
 tbody tr:nth-child(even){background:rgba(255,255,255,.2)}
 
+/* ---- Search trigger slots (Pagefind) ---- */
+.search-slot{margin:0 0 1rem}
+.topbar .search-slot{margin:0 0 0 auto}
+
 /* ---- Mobile: nav slides in from the left ---- */
 @media (max-width:60rem){
   .site{grid-template-columns:1fr}
