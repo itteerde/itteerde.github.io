@@ -1,9 +1,9 @@
 {
-  "name": "aetherial-site-tools",
+  "name": "ws-tools",
   "private": true,
   "scripts": {
-    "search": "pagefind --site aetherial-site",
-    "preview": "npm run search && npx --yes serve aetherial-site"
+    "search": "pagefind --site AEExport/ws",
+    "preview": "npm run search && npx --yes serve AEExport/ws"
   },
   "devDependencies": {
     "pagefind": "^1.6.0"
