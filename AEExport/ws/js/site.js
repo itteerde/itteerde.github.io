@@ -4,7 +4,7 @@
   const root = document.body.dataset.root || '';
   const NAV = [
     ['Home', 'index.html'],
-    ['The Crew', 'characters/index.html', [['Isolde Varrow', 'characters/isolde-varrow.html']]],
+    ['The Crew', 'characters/index.html', [['Isolde Varrow', 'characters/isolde-varrow.html'],['Enona', 'characters/enona.html']]],
     ['Journals', 'journals/index.html', [['Captain’s Log', 'journals/captains-log.html'], ['Session 1: Landfall', 'journals/session-01.html']]],
     ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]]
   ];
