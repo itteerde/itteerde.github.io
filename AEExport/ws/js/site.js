@@ -4,7 +4,7 @@
   const root = document.body.dataset.root || '';
   const NAV = [
     ['Home', 'index.html'],
-    ['The Crew', 'characters/index.html', [['Old Man Kelly', 'characters/kelly.html'],['Enona', 'characters/enona.html'],['Corinne', 'characters/corinne.html'],['Amber', 'characters/amber.html'],['Nikki', 'characters/nikki.html'],['Sinder', 'characters/sinder.html'],['Suture', 'characters/suture.html']]],
+    ['The Crew', 'characters/index.html', [['Old Man Kelly', 'characters/kelly.html'], ['Enona', 'characters/enona.html'], ['Corinne', 'characters/corinne.html'], ['Amber', 'characters/amber.html'], ['Nikki', 'characters/nikki.html'], ['Sinder', 'characters/sinder.html'], ['Suture', 'characters/suture.html']]],
     ['Journals', 'journals/index.html', [['Captain’s Log', 'journals/captains-log.html'], ['Enona’s Log', 'journals/enonas-log.html'], ['Corinne’s Log', 'journals/corinnes-log.html'], ['Amber’s Log', 'journals/ambers-log.html'], ['Nikki’s Log', 'journals/nikkis-log.html'], ['Sinder’s Log', 'journals/sinders-log.html'], ['Suture’s Log', 'journals/sutures-log.html'], ['Session 1: Landfall', 'journals/session-01.html']]],
     ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]]
   ];
@@ -45,8 +45,10 @@
     cfg.setAttribute('bundle-path', new URL(url('pagefind/'), document.baseURI).pathname);
     cfg.setAttribute('base-url', new URL(url('./'), document.baseURI).pathname);
     document.body.append(cfg);
-    const slot = () => { const d = document.createElement('div'); d.className = 'search-slot';
-      d.innerHTML = '<pagefind-modal-trigger></pagefind-modal-trigger>'; return d; };
+    const slot = () => {
+      const d = document.createElement('div'); d.className = 'search-slot';
+      d.innerHTML = '<pagefind-modal-trigger></pagefind-modal-trigger>'; return d;
+    };
     nav.querySelector('.brand').after(slot());
     bar.append(slot());
     document.body.append(document.createElement('pagefind-modal'));
@@ -70,3 +72,24 @@
   if (toc) toc.innerHTML = '<strong>Contents</strong><ol>' + [...document.querySelectorAll('.prose h2')]
     .map((h, i) => { h.id = h.id || 's' + (i + 1); return `<li><a href="#${h.id}">${h.textContent}</a></li>`; }).join('') + '</ol>';
 })();
+
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0) return;
+  const t = e.target instanceof Element ? e.target : null;
+  if (!t || t.closest('summary')) return; // summaries toggle natively
+  // leave links, form controls and anything interactive alone
+  if (t.closest('a, button, input, select, textarea, label, [contenteditable]')) return;
+  const body = t.closest('.fold-body');
+  if (!body) return;
+  // don't collapse while the reader is selecting/copying text
+  if (String(window.getSelection?.() ?? '').length) return;
+
+  // innermost fold wins: a click inside the Vault closes only the Vault
+  const fold = body.closest('details.fold');
+  if (!fold) return;
+  fold.open = false;
+
+  // a long section collapses upwards: keep its heading in view
+  const summary = fold.querySelector(':scope > summary');
+  if (summary && summary.getBoundingClientRect().top < 0) summary.scrollIntoView({ block: 'nearest' });
+});
