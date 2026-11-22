@@ -147,3 +147,66 @@ tbody tr:nth-child(even){background:rgba(255,255,255,.2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 @media print{.nav,.topbar,.scrim,.pager,.foot{display:none!important}.site{display:block}
   body{background:#fff}.sheet{box-shadow:none;background:none}.portrait{position:static}}
+
+
+/* ---- Character Sheet Collapeable ---*/
+
+/* Collapsible character sections (Features, Loadout, Inventory, Biography).
+   Append to css/aetherial.css. Colors derive from the surrounding text color, so it
+   follows the site theme; override the --fold-* variables to match the pirate look. */
+.fold {
+  --fold-line: var(--line, color-mix(in srgb, currentColor 28%, transparent));
+  --fold-bg: color-mix(in srgb, currentColor 5%, transparent);
+  --fold-accent: var(--accent, currentColor);
+  margin: 0.9rem 0;
+  border: 1px solid var(--fold-line);
+  border-radius: 4px;
+  background: var(--fold-bg);
+}
+.fold > summary {
+  cursor: pointer;
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before {
+  content: "\25B8";            /* ▸ */
+  color: var(--fold-accent);
+  transition: transform 0.15s;
+}
+.fold[open] > summary::before { transform: rotate(90deg); }
+.fold > summary:hover { color: var(--fold-accent); }
+.fold > summary:focus-visible { outline: 2px solid var(--fold-accent); outline-offset: 2px; }
+.fold .count {
+  font-size: 0.8em;
+  font-weight: 400;
+  opacity: 0.7;
+  border: 1px solid var(--fold-line);
+  border-radius: 999px;
+  padding: 0 0.5em;
+}
+.fold-body { padding: 0.2rem 1rem 0.9rem; border-top: 1px solid var(--fold-line); }
+.fold-body h3 {
+  margin: 1rem 0 0.4rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+.fold-body .entry { margin: 0.6rem 0; padding-bottom: 0.5rem; border-bottom: 1px dotted var(--fold-line); }
+.fold-body .entry:last-child { border-bottom: 0; }
+.fold-body .entry h4 { margin: 0 0 0.25rem; font-size: 1.02rem; }
+.fold-body .entry p { margin: 0.3rem 0; }
+.fold-body .entry ul { margin: 0.3rem 0 0.3rem 1.2rem; }
+.fold-body .statline { font-variant-numeric: tabular-nums; opacity: 0.85; }
+.fold-body .gold { font-style: italic; }
+.fold-body .muted { opacity: 0.6; }
+.fold-body .tag.on { border-color: var(--fold-accent); color: var(--fold-accent); }
+.fold.sub { margin: 1rem 0 0; background: transparent; }
+/* print: show everything */
+@media print { .fold:not([open]) > .fold-body { display: block; } }
