@@ -8,30 +8,51 @@ const root = game.folders.find(f => f.type === "JournalEntry" && f.name === fold
 if (!root) return ui.notifications.error(`Folder "${folderName}" not found`);
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const bySort = (a, b) => (a.sort ?? 0) - (b.sort ?? 0);
+// Fallback only: manual sort value, ties broken by name (natural order: "Chapter 2" < "Chapter 10")
+const bySort = (a, b) =>
+    (a.sort ?? 0) - (b.sort ?? 0) || String(a.name).localeCompare(String(b.name), undefined, { numeric: true });
 const visible = d => d.testUserPermission(game.user, "OBSERVER");
 
 // ---------- Pass 1: collect structure (needed to resolve internal links) ----------
 const pageIndex = new Map();       // page uuid  -> page id
 const entryFirstPage = new Map();  // entry uuid -> id of its first page
 
-function collect(folder) {
-    const node = { type: "folder", name: folder.name, children: [] };
-    // like Foundry's sidebar: subfolders first, then entries
-    for (const s of game.folders.filter(f => f.folder?.id === folder.id).sort(bySort)) {
-        node.children.push(collect(s));
+// The sidebar order is decided by Foundry (per-folder "sort alphabetically/manually", ties, ...).
+// Ask Foundry's own directory tree instead of re-implementing it; fall back to sort values + name.
+function findNode(node, id) {
+    if (node?.folder?.id === id) return node;
+    for (const c of node?.children ?? []) {
+        const hit = findNode(c, id);
+        if (hit) return hit;
     }
-    for (const e of folder.contents.slice().sort(bySort)) {
+    return null;
+}
+let rootNode = null;
+try { rootNode = findNode(game.journal.tree, root.id); } catch (err) { console.warn("Directory tree not available", err); }
+console.log(`[ExportRules] ordering by ${rootNode ? "Foundry directory tree" : "fallback (sort value, then name)"}`);
+
+function collect(folder, node) {
+    const out = { type: "folder", name: folder.name, children: [] };
+    // like Foundry's sidebar: subfolders first, then entries
+    const subs = node?.children
+        ? node.children.map(c => ({ folder: c.folder, node: c }))
+        : game.folders.filter(f => f.folder?.id === folder.id).sort(bySort).map(f => ({ folder: f, node: null }));
+    for (const s of subs) out.children.push(collect(s.folder, s.node));
+
+    const docs = node?.entries
+        ? node.entries.map(e => e.document ?? e)
+        : folder.contents.slice().sort(bySort);
+    for (const e of docs) {
         if (!visible(e)) continue;
         const pages = e.pages.contents.slice().sort(bySort).filter(visible);
         if (!pages.length) continue;
         entryFirstPage.set(e.uuid, pages[0].id);
         pages.forEach(p => pageIndex.set(p.uuid, p.id));
-        node.children.push({ type: "entry", doc: e, pages });
+        out.children.push({ type: "entry", doc: e, pages });
     }
-    return node;
+    return out;
 }
-const tree = collect(root);
+const tree = collect(root, rootNode);
 
 // ---------- Pass 2: render pages ----------
 async function toDataUrl(src) {
