@@ -2,6 +2,7 @@
 /**
  * update-pages.mjs – syncs character pages with a Foundry VTT party.json export.
  *
+ * Input: party-live.json from export-party-live.js (preferred) or a raw actor export.
  * A page belongs to an actor when <main ... data-uuid="..."> equals the actor's _id.
  * Only the data-driven parts of a page are rewritten; everything else
  * (portrait, diary line, GM notes, links, pager, ...) is left untouched.
@@ -19,6 +20,10 @@ import path from 'node:path';
 const HELP = `
 Usage:
   node update-pages.mjs [party.json] [site-dir] [options]
+
+  party.json may be either the output of export-party-live.js (recommended,
+  contains Foundry's own prepared values) or a raw actor export (values are
+  then reconstructed and may be inaccurate).
 
 Options:
   -p, --party <file>   Foundry export (default: party.json)
@@ -118,6 +123,32 @@ function derive(actor, { raw }) {
     stress: { max: (res.stress?.max ?? 6) + count('stress'), on: res.stress?.value ?? 0 },
     hope: { max: Math.max(0, (res.hope?.max ?? 6) - (sys.scars ?? 0)), on: res.hope?.value ?? 0 },
     background: sys.biography?.background ?? '',
+    warnings,
+  };
+}
+
+/**
+ * Live export (export-party-live.js, "format": "live-v1"): the macro already ran
+ * Foundry's/Daggerheart's own data preparation, so values are used as-is.
+ */
+function fromLive(actor) {
+  const l = actor.live;
+  const warnings = (l.missing ?? []).map((m) => `export could not resolve ${m}`);
+  const res = (r, fallbackMax = 0) => ({ max: r?.max ?? fallbackMax, on: r?.value ?? 0 });
+  return {
+    name: actor.name,
+    cls: l.class ?? undefined,
+    ancestry: l.ancestry ?? undefined,
+    community: l.community ?? undefined,
+    level: l.level ?? 1,
+    traits: Object.fromEntries(TRAITS.map((t) => [t, l.traits?.[t] ?? 0])),
+    experiences: l.experiences ?? [],
+    evasion: l.evasion ?? 0,
+    armor: { max: l.armor?.max ?? 0, on: l.armor?.value ?? 0 },
+    hp: res(l.hp),
+    stress: res(l.stress),
+    hope: res(l.hope),
+    background: l.background ?? '',
     warnings,
   };
 }
@@ -287,7 +318,7 @@ async function main() {
 
     const rel = path.relative(process.cwd(), file) || file;
     try {
-      const d = derive(actor, { raw: values.raw });
+      const d = actor.live ? fromLive(actor) : derive(actor, { raw: values.raw });
       const { html, report } = updateHtml(source, d, { backstory: values.backstory });
       const tag = `${actor.name} -> ${rel}`;
 
