@@ -1,6 +1,7 @@
 # itteerde.github.io
 
 ## DH
+- [Aetherial Expanse](https://itteerde.github.io/AEExport/ws/index.html)
 
 ```powershell
 node .\_src\node\update-pages.mjs -h
