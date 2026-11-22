@@ -9,7 +9,11 @@
  *
  *   Updated:  <title>, <h1>, breadcrumb, tags (class/ancestry/community/level),
  *             Traits, Vitals, Experiences
- *   Optional: Backstory (--backstory)
+ *   Sheet block (live exports only), collapsible <details> sections without any
+ *   images or extra files: Features, Loadout, Inventory, Biography. It lives between
+ *   <!-- sheet:start --> and <!-- sheet:end -->; first run inserts it right after the
+ *   Experiences list, later runs replace it in place. Style it with fold.css.
+ *   The hand-written "Backstory" section of a page is never touched.
  *
  * Zero dependencies, Node >= 18.
  */
@@ -29,8 +33,6 @@ Options:
   -p, --party <file>   Foundry export (default: party.json)
   -s, --site <dir>     Site root, searched recursively for *.html (default: .)
       --only <name>    Only actors whose name contains <name> (repeatable)
-      --backstory      Also replace the Backstory section with the sanitized
-                       biography.background text from the export
       --raw            Use stored values only (ignore level-up bonuses)
   -n, --dry-run        Show what would change, write nothing
       --backup         Save <file>.bak before overwriting
@@ -122,7 +124,6 @@ function derive(actor, { raw }) {
     },
     stress: { max: (res.stress?.max ?? 6) + count('stress'), on: res.stress?.value ?? 0 },
     hope: { max: Math.max(0, (res.hope?.max ?? 6) - (sys.scars ?? 0)), on: res.hope?.value ?? 0 },
-    background: sys.biography?.background ?? '',
     warnings,
   };
 }
@@ -148,7 +149,17 @@ function fromLive(actor) {
     hp: res(l.hp),
     stress: res(l.stress),
     hope: res(l.hope),
-    background: l.background ?? '',
+    sheet: 'features' in l
+      ? {
+          features: l.features ?? [],
+          loadout: l.loadout ?? [],
+          vault: l.vault ?? [],
+          inventory: l.inventory ?? {},
+          characteristics: l.characteristics ?? {},
+          background: l.background ?? '',
+          connections: l.connections ?? '',
+        }
+      : null,
     warnings,
   };
 }
@@ -195,15 +206,157 @@ function sanitizeRich(html) {
     .replace(/<(script|style)[\s\S]*?<\/\1>/gi, '')
     .replace(/@UUID\[[^\]]*\]\{([^}]*)\}/g, '$1') // Foundry enrichers
     .replace(/@\w+\[[^\]]*\]\{([^}]*)\}/g, '$1')
+    .replace(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi, '<p><strong>$1</strong></p>') // headings -> bold line
     .replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, (m, tag) => {
       tag = tag.toLowerCase();
       if (!ALLOWED.has(tag)) return '';
       return m.startsWith('</') ? `</${tag}>` : `<${tag}>`;
     })
     .replace(/<p>\s*(<br>)?\s*<\/p>/gi, '') // Foundry's empty spacer paragraphs
+    .replace(/<li>\s*<p>/gi, '<li>') // <li><p>x</p></li> -> <li>x</li>
+    .replace(/<\/p>\s*<\/li>/gi, '</li>')
+    .replace(/\s+<\/(p|li)>/gi, '</$1>')
     .replace(/<\/p>\s*/gi, '</p>\n')
     .trim();
+  if (s && !/<(p|ul|ol)\b/i.test(s)) s = `<p>${s}</p>`;
   return s;
+}
+
+// ---------------------------------------------- collapsible sheet sections
+
+const rich = (html) => sanitizeRich(html ?? '');
+const tag = (text, extra = '') => `<span class="tag${extra ? ` ${extra}` : ''}">${esc(text)}</span>`;
+const entry = (headInner, ...body) =>
+  `<div class="entry">\n<h4>${headInner}</h4>\n${body.filter(Boolean).join('\n')}\n</div>`;
+const fold = (id, label, count, inner, cls = 'fold') =>
+  `<details class="${cls}" id="${id}">\n<summary>${esc(label)}${count != null ? ` <span class="count">${count}</span>` : ''}</summary>\n<div class="fold-body">\n${inner}\n</div>\n</details>`;
+
+function renderFeatures(list) {
+  if (!list?.length) return '';
+  const groups = new Map();
+  for (const f of list) {
+    const key = [f.source, f.origin].filter(Boolean).join(' \u00b7 ');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(f);
+  }
+  const inner = [...groups]
+    .map(([heading, fs]) => {
+      const items = fs.map((f) =>
+        entry(
+          `${esc(f.name)}${f.form && f.form !== 'passive' ? ` ${tag(f.form[0].toUpperCase() + f.form.slice(1))}` : ''}`,
+          rich(f.description),
+        ),
+      );
+      return `<h3>${esc(heading)}</h3>\n${items.join('\n')}`;
+    })
+    .join('\n');
+  return fold('features', 'Features', list.length, inner);
+}
+
+function cardEntry(c) {
+  const tags = [
+    c.cardType && tag(c.cardType),
+    c.domain && tag(c.level != null ? `${c.domain} \u00b7 Level ${c.level}` : c.domain),
+    c.recallCost != null && tag(`Recall ${c.recallCost}`),
+  ].filter(Boolean);
+  return entry(`${esc(c.name)} ${tags.join(' ')}`, rich(c.description));
+}
+
+function renderLoadout(loadout, vault) {
+  if (!loadout?.length && !vault?.length) return '';
+  let inner = loadout?.length ? loadout.map(cardEntry).join('\n') : '<p class="muted">No cards in the loadout.</p>';
+  if (vault?.length) {
+    inner += `\n${fold('vault', 'Vault', vault.length, vault.map(cardEntry).join('\n'), 'fold sub')}`;
+  }
+  return fold('loadout', 'Loadout', loadout?.length ?? 0, inner);
+}
+
+function renderInventory(inv) {
+  if (!inv) return '';
+  const parts = [];
+  const gold = Object.entries(inv.gold ?? {}).filter(([, n]) => n > 0);
+  if (gold.length) {
+    parts.push(`<p class="gold">${gold.map(([k, n]) => `${k[0].toUpperCase()}${k.slice(1)} ${n}`).join(' \u00b7 ')}</p>`);
+  }
+  const feats = (fs) =>
+    (fs ?? []).map((f) => `<p><strong>${esc(f.name)}.</strong>${f.description ? ` ${rich(f.description).replace(/^<p>|<\/p>$/g, '')}` : ''}</p>`);
+  const qty = (n) => (n && n !== 1 ? ` \u00d7${n}` : '');
+
+  if (inv.weapons?.length) {
+    parts.push('<h3>Weapons</h3>');
+    for (const w of inv.weapons) {
+      const tags = [w.equipped && tag(w.secondary ? 'Secondary' : 'Equipped', 'on'), w.tier != null && tag(`Tier ${w.tier}`), w.burden && tag(w.burden)].filter(Boolean);
+      const line = [w.trait, w.range, w.damage].filter(Boolean).join(' \u00b7 ');
+      parts.push(entry(`${esc(w.name)} ${tags.join(' ')}`, line && `<p class="statline">${esc(line)}</p>`, ...feats(w.features), rich(w.description)));
+    }
+  }
+  if (inv.armor?.length) {
+    parts.push('<h3>Armor</h3>');
+    for (const a of inv.armor) {
+      const tags = [a.equipped && tag('Equipped', 'on'), a.tier != null && tag(`Tier ${a.tier}`)].filter(Boolean);
+      const bits = [
+        a.thresholds?.major != null && a.thresholds?.severe != null && `Thresholds ${a.thresholds.major}/${a.thresholds.severe}`,
+        a.slots != null && `Armor Score ${a.slots}`,
+      ].filter(Boolean);
+      parts.push(entry(`${esc(a.name)} ${tags.join(' ')}`, bits.length && `<p class="statline">${esc(bits.join(' \u00b7 '))}</p>`, ...feats(a.features), rich(a.description)));
+    }
+  }
+  for (const [label, rows] of [['Consumables', inv.consumables], ['Loot', inv.loot]]) {
+    if (!rows?.length) continue;
+    parts.push(`<h3>${label}</h3>`);
+    for (const r of rows) parts.push(entry(`${esc(r.name)}${qty(r.quantity)}`, rich(r.description)));
+  }
+  if (!parts.length) return '';
+  const count = ['weapons', 'armor', 'consumables', 'loot'].reduce((n, k) => n + (inv[k]?.length ?? 0), 0);
+  return fold('inventory', 'Inventory', count, parts.join('\n'));
+}
+
+function renderBiography(sheet) {
+  const ch = sheet.characteristics ?? {};
+  const label = { pronouns: '', age: 'Age ', faith: 'Faith: ' };
+  const tags = Object.entries(ch)
+    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== '')
+    .map(([k, v]) => tag(`${label[k] ?? `${k[0].toUpperCase()}${k.slice(1)}: `}${v}`));
+  const bg = rich(sheet.background);
+  const conn = rich(sheet.connections);
+  if (!tags.length && !bg && !conn) return '';
+  const parts = [];
+  if (tags.length) parts.push(`<p>${tags.join(' ')}</p>`);
+  if (bg) parts.push(`<h3>Background</h3>\n${bg}`);
+  if (conn) parts.push(`<h3>Connections</h3>\n${conn}`);
+  return fold('biography', 'Biography', null, parts.join('\n'));
+}
+
+function renderSheet(sheet) {
+  return [
+    renderFeatures(sheet.features),
+    renderLoadout(sheet.loadout, sheet.vault),
+    renderInventory(sheet.inventory),
+    renderBiography(sheet),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+const SHEET_RE = /<!-- sheet:start -->[\s\S]*?<!-- sheet:end -->/;
+const EXPERIENCES_RE = /<h2>Experiences<\/h2>\s*<ul>[\s\S]*?<\/ul>/;
+
+function upsertSheet(html, sheet, report) {
+  const block = `<!-- sheet:start -->\n${renderSheet(sheet)}\n<!-- sheet:end -->`;
+  if (SHEET_RE.test(html)) {
+    return html.replace(SHEET_RE, (m) => {
+      if (m !== block) report.changed.push({ label: 'sheet (features, loadout, inventory, biography)', before: m, after: block, brief: true });
+      return block;
+    });
+  }
+  const insert = (m, where) => {
+    report.changed.push({ label: 'sheet (new)', before: '', after: block, brief: true });
+    return where === 'after' ? `${m}\n${block}` : `${block}\n${m}`;
+  };
+  if (EXPERIENCES_RE.test(html)) return html.replace(EXPERIENCES_RE, (m) => insert(m, 'after'));
+  if (/<\/article>/.test(html)) return html.replace(/<\/article>/, (m) => insert(m, 'before'));
+  report.missing.push('sheet (no Experiences list or </article> to anchor to)');
+  return html;
 }
 
 // --------------------------------------------------------- page updating
@@ -221,7 +374,7 @@ function swap(html, re, build, report, label) {
   });
 }
 
-function updateHtml(source, d, { backstory }) {
+function updateHtml(source, d) {
   const eol = source.includes('\r\n') ? '\r\n' : '\n';
   let html = source.replace(/\r\n/g, '\n');
   const report = { changed: [], missing: [] };
@@ -249,18 +402,7 @@ function updateHtml(source, d, { backstory }) {
   html = swap(html, /(<h2>Vitals<\/h2>\s*)<dl class="stats">[\s\S]*?<\/dl>/, renderVitals(d), report, 'Vitals');
   html = swap(html, /(<h2>Experiences<\/h2>\s*)<ul>[\s\S]*?<\/ul>/, renderExperiences(d), report, 'Experiences');
 
-  if (backstory) {
-    const body = sanitizeRich(d.background);
-    if (body) {
-      html = swap(
-        html,
-        /(<h2>Backstory<\/h2>\n)[\s\S]*?(?=<div class="note|<h2>|<\/article>)/,
-        `${body}\n`,
-        report,
-        'Backstory',
-      );
-    }
-  }
+  if (d.sheet) html = upsertSheet(html, d.sheet, report);
 
   return { html: html.replace(/\n/g, eol), report };
 }
@@ -281,7 +423,6 @@ async function main() {
       party: { type: 'string', short: 'p' },
       site: { type: 'string', short: 's' },
       only: { type: 'string', multiple: true },
-      backstory: { type: 'boolean', default: false },
       raw: { type: 'boolean', default: false },
       'dry-run': { type: 'boolean', short: 'n', default: false },
       backup: { type: 'boolean', default: false },
@@ -319,7 +460,7 @@ async function main() {
     const rel = path.relative(process.cwd(), file) || file;
     try {
       const d = actor.live ? fromLive(actor) : derive(actor, { raw: values.raw });
-      const { html, report } = updateHtml(source, d, { backstory: values.backstory });
+      const { html, report } = updateHtml(source, d);
       const tag = `${actor.name} -> ${rel}`;
 
       for (const w of d.warnings) console.warn(`  ! ${actor.name}: ${w}`);
@@ -332,7 +473,10 @@ async function main() {
       console.log(`${dry ? '~' : '*'} ${tag}: ${report.changed.map((c) => c.label).join(', ')}`);
       if (values.verbose || dry) for (const c of report.changed) {
         console.log(`    [${c.label}]`);
-        showDiff(c.before, c.after);
+        if (c.brief) {
+          const n = c.after.split('\n').filter((l) => !c.before.split('\n').includes(l)).length;
+          console.log(`      ${n} line(s) new or changed`);
+        } else showDiff(c.before, c.after);
       }
       if (!dry) {
         if (values.backup) await copyFile(file, `${file}.bak`);
