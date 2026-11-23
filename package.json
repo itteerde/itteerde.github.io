@@ -3,9 +3,13 @@
   "private": true,
   "scripts": {
     "search": "pagefind --site AEExport/ws",
-    "preview": "npm run search && npx --yes serve AEExport/ws"
+    "preview": "npm run search && npx --yes serve AEExport/ws",
+    "graph": "node _src/node/build-graph.mjs",
+    "graph:test": "node _src/node/test-graph.mjs",
+    "vendor": "node _src/node/vendor-three.mjs"
   },
   "devDependencies": {
-    "pagefind": "^1.6.0"
+    "pagefind": "^1.6.0",
+    "three": "^0.187.0"
   }
 }

@@ -1,0 +1,3 @@
+{
+  "_comment": "Fixes for Foundry actors. Key = Foundry actor name or _id. Fields: id, label, sub, type (pc|npc), href, skip:true. Example: \"Amber\": { \"id\": \"amber\", \"label\": \"Mirielle\" }"
+}
