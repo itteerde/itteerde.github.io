@@ -6,7 +6,10 @@
     ['Home', 'index.html'],
     ['The Crew', 'characters/index.html', [['Old Man Kelly', 'characters/kelly.html'], ['Enona', 'characters/enona.html'], ['Corinne', 'characters/corinne.html'], ['Mirielle', 'characters/amber.html'], ['Nikki', 'characters/nikki.html'], ['Sinder', 'characters/sinder.html'], ['Suture', 'characters/suture.html']]],
     ['Journals', 'journals/index.html', [['Captain’s Log', 'journals/captains-log.html'], ['Enona’s Log', 'journals/enonas-log.html'], ['Corinne’s Log', 'journals/corinnes-log.html'], ['Mirielle’s Log', 'journals/ambers-log.html'], ['Nikki’s Log', 'journals/nikkis-log.html'], ['Sinder’s Log', 'journals/sinders-log.html'], ['Suture’s Log', 'journals/sutures-log.html'], ['Session 1: Landfall', 'journals/session-01.html']]],
-    ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]]
+    ['Quests', 'quests/index.html', [['Collecting 42 Shark Teeth', 'quests/q_00001.html'], ['Collecting 43 Shark Teeth', 'quests/q_00002.html']]],
+    ['Characters', 'contacts/index.html', [['Isolde Varrow', 'contacts/c_00001.html']]],
+    ['Essays', 'essays/index.html', [['The Aether Tides', 'essays/aether-tides.html']]],
+    ['Index', 'idx/index.html', [['A', 'idx/a.html'], ['B', 'idx/b.html']]]
   ];
   const url = h => root + h;
   // Compare paths without ".html", "index.html" or a trailing slash, so pretty-URL servers (serve, Netlify, Cloudflare Pages) still match.
@@ -14,12 +17,23 @@
   const here = h => norm(new URL(url(h), document.baseURI).pathname) === norm(location.pathname);
   const cur = h => here(h) ? ' aria-current="page"' : '';
 
+  // Fold state of the menu categories, remembered for this browser tab (explicit choices only).
+  const KEY = 'nav-open';
+  const state = (() => { try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; } catch { return {}; } })();
+  const save = () => { try { sessionStorage.setItem(KEY, JSON.stringify(state)); } catch { } };
+  const isOpen = (h, kids) => h in state ? state[h] : (here(h) || kids.some(k => here(k[1])));
+
   const nav = document.createElement('nav');
   nav.className = 'nav'; nav.id = 'site-nav'; nav.setAttribute('aria-label', 'Main');
   nav.innerHTML = `<a class="brand" href="${url('index.html')}"><small>A Daggerheart campaign</small>The Aetherial Expanse</a><ul>` +
-    NAV.map(([t, h, kids = []]) => `<li><a href="${url(h)}"${cur(h)}>${t}</a>` +
-      (kids.length && (here(h) || kids.some(k => here(k[1])))
-        ? '<ul>' + kids.map(([kt, kh]) => `<li><a href="${url(kh)}"${cur(kh)}>${kt}</a></li>`).join('') + '</ul>' : '') + '</li>').join('') + '</ul>';
+    NAV.map(([t, h, kids = []]) => {
+      const open = kids.length > 0 && isOpen(h, kids);
+      return `<li class="${kids.length ? 'has-kids' : ''}${open ? ' is-open' : ''}" data-h="${h}"><a href="${url(h)}"${cur(h)}>${t}</a>` +
+        (kids.length
+          ? `<button type="button" class="fold" aria-expanded="${open}" aria-label="Show or hide ${t}">▸</button><ul>` +
+          kids.map(([kt, kh]) => `<li><a href="${url(kh)}"${cur(kh)}>${kt}</a></li>`).join('') + '</ul>'
+          : '') + '</li>';
+    }).join('') + '</ul>';
 
   const bar = document.createElement('header');
   bar.className = 'topbar';
@@ -31,8 +45,26 @@
   const set = o => { document.body.classList.toggle('nav-open', o); burger.setAttribute('aria-expanded', o); };
   burger.onclick = () => set(!document.body.classList.contains('nav-open'));
   scrim.onclick = () => set(false);
-  nav.onclick = e => e.target.closest('a') && set(false);
   addEventListener('keydown', e => e.key === 'Escape' && set(false));
+
+  const toggle = li => {
+    const o = !li.classList.contains('is-open');
+    li.classList.toggle('is-open', o);
+    li.querySelector('.fold').setAttribute('aria-expanded', o);
+    state[li.dataset.h] = o; save();
+  };
+  nav.onclick = e => {
+    const li = e.target.closest('li.has-kids');
+    if (e.target.closest('.fold')) return toggle(li);            // the little arrow
+    const a = e.target.closest('a');
+    if (!a) return;
+    if (li && a === li.firstElementChild && !(e.ctrlKey || e.metaKey || e.shiftKey)) {   // the category name itself
+      const h = li.dataset.h;
+      if (here(h)) { e.preventDefault(); return toggle(li); }     // already on its page: just fold/unfold, no reload
+      state[h] = !li.classList.contains('is-open'); save();       // open -> fold, folded -> unfold, and go to its page
+    }
+    set(false);                                                   // close the mobile drawer after real navigation
+  };
 
   // Search (Pagefind). The trigger appears only if the index exists; build it with `npm run search` after every change.
   const sCss = document.createElement('link');
