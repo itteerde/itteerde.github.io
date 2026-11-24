@@ -99,7 +99,35 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
         canSaveInPlace ? btn('Save in place…', A.save, 'Overwrite _src/data/graph.json directly (Chrome / Edge)') : null));
     toolbar.append(undoB, redoB, selB, conB, h('button', { type: 'button', class: 'btn ghost', onclick: A.relayout, title: 'Re-run the force layout (only the selected nodes, if any)' }, 'Relayout'), delB, expB);
   }
-  toolbar.append(status);
+  /* --------------------------------------------------------- full window
+     "is-max" turns the whole .graph-app (toolbar, stage, side panel) into a fixed full-window layer and, where the browser
+     allows it, also asks for real full screen. Without Fullscreen API support (iPhone Safari) the CSS layer alone is used. */
+  const root = shell.root;
+  const maxB = h('button', { type: 'button', class: 'btn ghost graph-maxbtn', onclick: () => toggleMax() });
+  const corner = h('button', { type: 'button', class: 'graph-maxcorner', onclick: () => toggleMax() });
+  root.prepend(h('div', { class: 'graph-maxtitle' }, h('strong', {}, document.querySelector('h1')?.textContent || 'Graph'), h('span', {}, ' · press Esc or use the button to return to the page')));
+  shell.stage.append(corner);
+  const paintMax = () => {
+    const on = root.classList.contains('is-max');
+    maxB.textContent = on ? '⤡ Exit full window' : '⤢ Full window';
+    corner.textContent = on ? '⤡ Exit' : '⤢ Full window';
+    maxB.title = corner.title = on ? 'Back to the page (Esc or M)' : 'Use the whole window (M)';
+    maxB.setAttribute('aria-pressed', on);
+  };
+  const applyMax = (on) => { root.classList.toggle('is-max', on); document.documentElement.classList.toggle('graph-max-lock', on); paintMax(); };
+  const toggleMax = async () => {
+    if (!root.classList.contains('is-max')) { applyMax(true); try { await root.requestFullscreen?.(); } catch { } return; }
+    if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch { } }
+    applyMax(false);
+  };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) applyMax(false); });
+  addEventListener('keydown', (e) => {
+    if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if (e.key === 'Escape' && root.classList.contains('is-max')) { e.stopImmediatePropagation(); toggleMax(); }
+    else if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'm') toggleMax();
+  });
+  paintMax();
+  toolbar.append(status, maxB);
 
   /* -------------------------------------------------------------- legend */
   const legend = h('div', { class: 'graph-legend' });

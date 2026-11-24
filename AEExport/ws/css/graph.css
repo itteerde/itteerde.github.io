@@ -63,3 +63,22 @@
   .graph-status{margin-left:0;width:100%}
 }
 @media print{.graph-toolbar,.graph-banner,.graph-stage{display:none}}
+
+/* ---- full window ("is-max", see ui.js) ---- */
+.graph-maxcorner{position:absolute;z-index:2;top:.5rem;right:.5rem;padding:.25rem .7rem;font:600 .85rem var(--font-head);letter-spacing:.03em;color:var(--brass-hi);cursor:pointer;
+  background:rgba(7,21,28,.72);border:1px solid var(--brass-lo);border-radius:2rem;backdrop-filter:blur(2px)}
+.graph-maxcorner:hover{background:rgba(7,21,28,.92);border-color:var(--brass)}
+.graph-maxtitle{display:none}
+.graph-toolbar .graph-maxbtn{margin-left:.2rem}
+html.graph-max-lock,html.graph-max-lock body{overflow:hidden}
+.graph-app.is-max{position:fixed;inset:0;z-index:100;margin:0;padding:.6rem .9rem .8rem;display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 0,rgba(255,255,255,.4),transparent 65%),linear-gradient(var(--parch),var(--parch-2))}
+.graph-app.is-max .graph-maxtitle{display:block;margin:0 0 .4rem;font-family:var(--font-head);font-size:1.1rem}
+.graph-app.is-max .graph-maxtitle span{font:italic .9rem var(--font-body);color:var(--ink-soft)}
+.graph-app.is-max .graph-main{flex:1;min-height:0;align-items:stretch;grid-template-rows:minmax(0,1fr)}
+.graph-app.is-max .graph-stage{height:auto;min-height:0}
+.graph-app.is-max .graph-side{min-height:0;overflow:auto;padding-right:.2rem}
+.graph-app.is-max .graph-list,.graph-app.is-max .graph-banner[hidden]{display:none}
+@media (max-width:60rem){
+  .graph-app.is-max .graph-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,11rem)}
+}
