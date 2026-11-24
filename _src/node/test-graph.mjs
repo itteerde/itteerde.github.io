@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { Graph, slugify, formatJson } from '../../AEExport/ws/js/graph/model.js';
 import { seedMissing, runLayout } from '../../AEExport/ws/js/graph/layout.js';
-import { readNpcs, readFoundry, mergeSources } from './build-graph.mjs';
+import { readNpcs, readFoundry, mergeSources, scanPages } from './build-graph.mjs';
 
 let n = 0;
 const t = (name, fn) => Promise.resolve(fn()).then(() => console.log('  ✔', name), (e) => { console.log('  ✖', name, '\n   ', e.message); process.exitCode = 1; }).finally(() => n++);
@@ -23,6 +23,13 @@ await t('Foundry export is read in several shapes, map renames', () => {
   const raw = { actors: [{ _id: 'a1', name: 'Amber', type: 'character' }, { _id: 'a2', name: 'Kelly', type: 'character' }] };
   const r = readFoundry(raw, { Amber: { id: 'amber', label: 'Mirielle' } });
   assert.deepEqual(r.map((x) => [x.id, x.label, x.href]), [['amber', 'Mirielle', 'characters/amber.html'], ['kelly', 'Kelly', 'characters/kelly.html']]);
+});
+
+await t('actors are linked to their page through <main data-uuid>', () => {
+  const raw = { actors: [{ _id: 'u1', name: 'Amber Sunshadow', type: 'character' }, { _id: 'u2', name: 'Old Man Kelly', type: 'character' }, { _id: 'u3', name: 'No Page', type: 'character' }] };
+  const r = readFoundry(raw, {}, { u1: 'characters/amber.html', u2: 'characters/kelly.html' });
+  assert.deepEqual(r.map((x) => [x.id, x.href]), [['amber', 'characters/amber.html'], ['kelly', 'characters/kelly.html'], ['no-page', 'characters/no-page.html']]);
+  assert.equal(typeof scanPages('/does/not/exist'), 'object');
 });
 
 await t('same id in two sources merges, inside one source is an error', () => {

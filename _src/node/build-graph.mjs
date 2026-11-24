@@ -3,7 +3,7 @@
 
      tmp/party-live.json          Foundry export (PCs, and any NPCs you export)      → nodes
      _src/data/npcs.json          hand-written NPCs (and PCs, if you like)           → nodes
-     _src/data/foundry-map.json   optional: fixes for Foundry actors (id, href, …)
+     _src/data/foundry-map.json   optional: overrides per Foundry actor (id, label, href, skip …)
      _src/data/graph.json         overlay = what the editor exports                  → groups, edges, positions, stubs
                          ──────▶  AEExport/ws/data/graphs/crew-and-npcs.json         (committed, loaded by the page)
 
@@ -29,8 +29,27 @@ const GRAPHS = [{
 const read = (rel) => { const f = path.join(ROOT, rel); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null; };
 const stripComments = (o) => Object.fromEntries(Object.entries(o || {}).filter(([k]) => !k.startsWith('_')));
 
-/** Foundry adapter – the only place that knows the shape of the Foundry export. Adjust here if your export differs. */
-export function readFoundry(raw, map = {}) {
+/** Pages that belong to a Foundry actor: <main data-uuid="<actor _id>"> (the same link update-pages.mjs uses). → { uuid: "characters/kelly.html" } */
+export function scanPages(dir = SITE) {
+  const out = {};
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.name.startsWith('.') || ['node_modules', 'pagefind', 'vendor'].includes(e.name)) continue;
+      const p = path.join(d, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.toLowerCase().endsWith('.html')) {
+        const id = fs.readFileSync(p, 'utf8').match(/<main\b[^>]*\bdata-uuid="([^"]+)"/)?.[1];
+        if (id) out[id] = path.relative(SITE, p).split(path.sep).join('/');
+      }
+    }
+  };
+  if (fs.existsSync(dir)) walk(dir);
+  return out;
+}
+
+/** Foundry adapter – the only place that knows the shape of the Foundry export (export-party-live.js, "live-v2").
+ *  id/href of an actor come from its page (data-uuid); otherwise from foundry-map.json; otherwise from the name. */
+export function readFoundry(raw, map = {}, pages = {}) {
   if (!raw) return [];
   const actors = Array.isArray(raw) ? raw : raw.actors || raw.characters || raw.party || raw.members || [];
   const out = [];
@@ -40,8 +59,9 @@ export function readFoundry(raw, map = {}) {
     const m = map[fid] || map[name] || {};
     if (m.skip) continue;
     const type = m.type || ((a.type || 'character') === 'character' ? 'pc' : 'npc');
-    const id = m.id || slugify(name);
-    out.push({ id, label: m.label || name, sub: m.sub, type, href: m.href ?? (type === 'pc' ? `characters/${id}.html` : undefined), foundry: fid, src: 'foundry' });
+    const page = pages[fid];
+    const id = m.id || (page ? path.posix.basename(page, '.html') : slugify(name));
+    out.push({ id, label: m.label || name, sub: m.sub, type, href: m.href ?? page ?? (type === 'pc' ? `characters/${id}.html` : undefined), foundry: fid, src: 'foundry' });
   }
   return out;
 }
@@ -87,7 +107,7 @@ function applyAliases(records, overlay) {
 export async function buildGraph(cfg, { log = console.log } = {}) {
   const map = stripComments(read(cfg.map));
   const foundryRaw = read(cfg.foundry);
-  const foundry = readFoundry(foundryRaw, map);
+  const foundry = readFoundry(foundryRaw, map, scanPages());
   if (foundryRaw && !foundry.length) log(`  ! ${cfg.foundry}: no actors recognised – adjust readFoundry() in build-graph.mjs`);
   if (!foundryRaw) log(`  · ${cfg.foundry} not found, using hand-written nodes only`);
   const npcs = readNpcs(read(cfg.npcs));
