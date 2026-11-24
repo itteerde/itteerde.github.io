@@ -41,7 +41,7 @@
     { "id": "silent-wren", "label": "Silent Wren", "type": "npc", "group": "smugglers", "pos": [-70, 16.3, 24.5], "src": "npcs", "demo": true },
     { "id": "sinder-jack-marrow", "label": "Sinder Jack Marrow", "sub": "Master Gunner", "type": "pc", "group": "crew", "href": "characters/sinder.html", "pos": [73.2, -83.7, -27.1], "src": "foundry", "foundry": "aty1EvOcmp1D8Avd" },
     { "id": "sister-maren", "label": "Sister Maren", "type": "npc", "group": "cult", "pos": [-15.4, 28.2, 50.3], "src": "npcs", "demo": true },
-    { "id": "suture", "label": "Sinder", "sub": "Surgeon", "type": "pc", "group": "crew", "href": "characters/suture.html", "pos": [44, -56, 31], "src": "foundry", "foundry": "m8PlmFST5MscpRrs" },
+    { "id": "suture", "label": "Surture", "sub": "Surgeon", "type": "pc", "group": "crew", "href": "characters/suture.html", "pos": [44, -56, 31], "src": "foundry", "foundry": "m8PlmFST5MscpRrs" },
     { "id": "tessaly-brine", "label": "Tessaly Brine", "sub": "Chandler", "type": "npc", "group": "harbour", "pos": [-55.4, -28.6, -12.1], "src": "npcs", "demo": true },
     { "id": "the-drowned-priest", "label": "The Drowned Priest", "sub": "Prophet", "type": "npc", "group": "cult", "pos": [-7.2, 23.8, 73.7], "src": "npcs", "demo": true },
     { "id": "tidewatcher-sorrel", "label": "Tidewatcher Sorrel", "type": "npc", "group": "scholars", "pos": [54.2, 39.8, -3.9], "src": "npcs", "demo": true }
