@@ -4,7 +4,7 @@
    Two JSON shapes exist (see README.md and schema/):
      built    – what the page loads: complete nodes (label, href, src ...), edges, groups.
      overlay  – what the editor exports and you commit: groups, edges, positions, hand-added stubs, exclusions. */
-import { NODE_TYPES, EDGE_KINDS } from './config.js';
+import { NODE_TYPES, EDGE_KINDS, SHAPES } from './config.js';
 
 export const slugify = (s) => String(s)
   .replace(/ß/g, 'ss').replace(/[æÆ]/g, 'ae').replace(/[øØ]/g, 'o').replace(/&/g, ' and ')
@@ -65,6 +65,8 @@ export function formatJson(obj) {
 export class Graph {
   constructor() {
     this.groups = {};            // id -> { label, color }
+    this.types = {};             // id -> { label, shape, size, color? }  (adds to / overrides config.js NODE_TYPES)
+    this.kinds = {};             // id -> { label, color }                (adds to / overrides config.js EDGE_KINDS)
     this.nodes = new Map();      // id -> { id, label, sub?, type, group?, href?, pos?, src, ... }
     this.edges = [];             // { source, target, kind?, label? }
     this.sourceIds = new Set();  // ids that come from Foundry / npcs.json (not from the overlay)
@@ -78,6 +80,8 @@ export class Graph {
   static fromBuilt(json) {
     const g = new Graph();
     g.groups = structuredClone(json.groups || {});
+    g.types = structuredClone(json.types || {});
+    g.kinds = structuredClone(json.kinds || {});
     for (const n of json.nodes || []) {
       const node = { type: 'npc', ...n };
       node.src = node.src || 'overlay';
@@ -100,6 +104,8 @@ export class Graph {
       else this.nodes.set(id, { id, type: 'npc', ...rest, src: 'overlay' });
     }
     if (ov.groups) this.groups = structuredClone(ov.groups);
+    if (ov.types) this.types = structuredClone(ov.types);
+    if (ov.kinds) this.kinds = structuredClone(ov.kinds);
     if (ov.edges) this.edges = ov.edges.map((e) => ({ ...e }));
     return this;
   }
@@ -126,7 +132,7 @@ export class Graph {
   updateNode(id, patch) {
     const n = this.nodes.get(id);
     for (const [k, v] of Object.entries(patch)) { if (v === undefined || v === '') delete n[k]; else n[k] = v; }
-    this.emit('node', { id });
+    this.emit('type' in patch ? 'structure' : 'node', { id });   // a new type can mean a new shape → rebuild
   }
   hasEdge(a, b, kind) { const k = edgeKey({ source: a, target: b, kind }); return this.edges.some((e) => edgeKey(e) === k); }
   addEdge(e) { this.edges.push(e); this.emit('structure'); }
@@ -137,6 +143,16 @@ export class Graph {
     this.emit('structure');
   }
   setGroupDef(id, def) { if (def) this.groups[id] = def; else delete this.groups[id]; this.emit('groups'); }
+  setTypeDef(id, def) { if (def) this.types[id] = def; else delete this.types[id]; this.emit('structure'); }   // shape/size change → rebuild
+  setKindDef(id, def) { if (def) this.kinds[id] = def; else delete this.kinds[id]; this.emit('kinds'); }
+  addEdges(list) { this.edges.push(...list); this.emit('structure'); }
+  removeEdges(list) { this.edges = this.edges.filter((e) => !list.includes(e)); this.emit('structure'); }
+
+  /** Effective definition of a node type / connection kind: built-in table, overridden by the data. */
+  typeDef(id) { return { label: id || 'Character', shape: 'sphere', size: 1, ...NODE_TYPES[id], ...this.types[id] }; }
+  kindDef(id) { const k = id || 'default'; return { label: k, color: EDGE_KINDS.default.color, ...EDGE_KINDS[k], ...this.kinds[k] }; }
+  allTypes() { return [...new Set([...Object.keys(NODE_TYPES), ...Object.keys(this.types)])].map((id) => [id, this.typeDef(id)]); }
+  allKinds() { return [...new Set([...Object.keys(EDGE_KINDS), ...Object.keys(this.kinds)])].map((id) => [id, this.kindDef(id)]); }
   edgesOf(id) { return this.edges.filter((e) => e.source === id || e.target === id); }
 
   /** A read-only view on part of the graph. focus: ids (+ depth hops), groups: group ids; both given = union. */
@@ -154,7 +170,7 @@ export class Graph {
       }
     }
     const g = new Graph();
-    g.groups = structuredClone(this.groups);
+    g.groups = structuredClone(this.groups); g.types = structuredClone(this.types); g.kinds = structuredClone(this.kinds);
     for (const id of keep) g.nodes.set(id, structuredClone(this.nodes.get(id)));
     g.edges = this.edges.filter((e) => keep.has(e.source) && keep.has(e.target)).map((e) => ({ ...e }));
     return g;
@@ -165,6 +181,8 @@ export class Graph {
     return {
       version: 1,
       groups: this.groups,
+      types: this.types,
+      kinds: this.kinds,
       nodes: [...this.nodes.values()].sort(byId).map(nodeOut),
       edges: [...this.edges].sort(edgeSort).map(edgeOut)
     };
@@ -179,7 +197,7 @@ export class Graph {
       nodes.push(o);
     }
     const exclude = [...this.sourceIds].filter((id) => !this.nodes.has(id)).sort();
-    return { version: 1, groups: this.groups, nodes, edges: [...this.edges].sort(edgeSort).map(edgeOut), exclude: exclude.length ? exclude : undefined };
+    return { version: 1, groups: this.groups, types: this.types, kinds: this.kinds, nodes, edges: [...this.edges].sort(edgeSort).map(edgeOut), exclude: exclude.length ? exclude : undefined };
   }
 
   validate() {
@@ -187,8 +205,8 @@ export class Graph {
     for (const n of this.nodes.values()) {
       if (!n.label) errors.push(`node "${n.id}": no label`);
       if (n.group && !this.groups[n.group]) errors.push(`node "${n.id}": group "${n.group}" is not defined in "groups"`);
-      if (!n.group) ungrouped.push(n.id);
-      if (n.type && !NODE_TYPES[n.type]) warnings.push(`node "${n.id}": unknown type "${n.type}" (see config.js)`);
+      if (!n.group && !this.typeDef(n.type).color) ungrouped.push(n.id);
+      if (n.type && !NODE_TYPES[n.type] && !this.types[n.type]) warnings.push(`node "${n.id}": unknown type "${n.type}" (define it in "types" or config.js)`);
       if (n.pos && !(Array.isArray(n.pos) && n.pos.length === 3 && n.pos.every(Number.isFinite))) errors.push(`node "${n.id}": pos must be [x, y, z]`);
     }
     for (const e of this.edges) {
@@ -196,11 +214,12 @@ export class Graph {
       if (!this.nodes.has(e.source)) errors.push(`${tag}: unknown source "${e.source}"${this._hint(e.source)}`);
       if (!this.nodes.has(e.target)) errors.push(`${tag}: unknown target "${e.target}"${this._hint(e.target)}`);
       if (e.source === e.target) errors.push(`${tag}: edge to itself`);
-      if (e.kind && !EDGE_KINDS[e.kind]) warnings.push(`${tag}: unknown kind "${e.kind}" (see config.js)`);
+      if (e.kind && !EDGE_KINDS[e.kind] && !this.kinds[e.kind]) warnings.push(`${tag}: unknown kind "${e.kind}" (define it in "kinds" or config.js)`);
       const k = edgeKey(e);
       if (seen.has(k)) errors.push(`${tag}: duplicate edge`);
       seen.add(k);
     }
+    for (const [id, t] of Object.entries(this.types)) if (t.shape && !SHAPES[t.shape]) warnings.push(`type "${id}": unknown shape "${t.shape}" (see SHAPES in config.js)`);
     if (ungrouped.length) warnings.push(`${ungrouped.length} node(s) without group: ${ungrouped.slice(0, 8).join(', ')}${ungrouped.length > 8 ? ', …' : ''}`);
     return { errors, warnings };
   }

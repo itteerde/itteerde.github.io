@@ -64,6 +64,34 @@ await t('validate reports dangling edges with a hint, duplicates and unknown gro
   assert.ok(errors.some((e) => e.includes('itself')));
 });
 
+await t('node types and connection kinds: built-ins, data overrides, round trip, validation', () => {
+  const g = Graph.fromBuilt({
+    groups: {}, types: { event: { label: 'Event', shape: 'cube', size: 1.3, color: '#e08a3c' }, npc: { label: 'Person', shape: 'cone', size: 1 } },
+    kinds: { witnessed: { label: 'Took part in', color: '#e08a3c' }, ally: { label: 'Friend', color: '#00ff00' } },
+    nodes: [{ id: 'a', label: 'A', type: 'npc' }, { id: 'e', label: 'E', type: 'event' }, { id: 'x', label: 'X', type: 'mystery' }],
+    edges: [{ source: 'a', target: 'e', kind: 'witnessed' }, { source: 'a', target: 'x', kind: 'nope' }]
+  });
+  assert.equal(g.typeDef('pc').shape, 'sphere');                       // built-in
+  assert.equal(g.typeDef('npc').shape, 'cone');                        // overridden by data
+  assert.equal(g.typeDef('event').color, '#e08a3c');                   // added by data
+  assert.equal(g.typeDef('mystery').label, 'mystery');                 // unknown: harmless fallback
+  assert.equal(g.kindDef('ally').color, '#00ff00'); assert.equal(g.kindDef().label, 'Connection');
+  assert.deepEqual(g.allTypes().map(([id]) => id).sort(), ['event', 'npc', 'pc']);
+  const { errors, warnings } = g.validate();
+  assert.equal(errors.filter((e) => /group/.test(e)).length, 0);
+  assert.ok(warnings.some((w) => w.includes('unknown type "mystery"')) && warnings.some((w) => w.includes('unknown kind "nope"')));
+  assert.ok(warnings.some((w) => /2 node\(s\) without group: a, x/.test(w)), 'typed colour exempts the event from the group warning: ' + warnings.join('|'));
+  g.types.bad = { shape: 'torpedo' };
+  assert.ok(g.validate().warnings.some((w) => w.includes('unknown shape "torpedo"')));
+  const ov = JSON.parse(formatJson(g.toOverlay()));
+  assert.deepEqual(ov.kinds.witnessed, { label: 'Took part in', color: '#e08a3c' }); assert.equal(ov.types.event.shape, 'cube');
+  const g2 = new Graph(); for (const n of g.nodes.values()) { g2.nodes.set(n.id, { ...n, src: 'npcs' }); g2.sourceIds.add(n.id); }
+  g2.applyOverlay(ov); assert.deepEqual(g2.toBuilt().types, g.toBuilt().types); assert.deepEqual(g2.toBuilt().kinds, g.toBuilt().kinds);
+  const kinds = []; g.on((e) => kinds.push(e.kind)); g.updateNode('a', { type: 'event' }); g.updateNode('a', { sub: 's' }); g.setKindDef('ally'); g.setTypeDef('bad');
+  assert.deepEqual(kinds, ['structure', 'node', 'kinds', 'structure']);
+  assert.equal(g.subgraph({ focus: ['a'] }).types.event.shape, 'cube');
+});
+
 await t('subgraph: focus + depth, groups, union', () => {
   const g = Graph.fromBuilt({ groups: { a: {}, b: {} }, nodes: ['1', '2', '3', '4'].map((id, i) => ({ id, label: id, group: i < 2 ? 'a' : 'b' })), edges: [{ source: '1', target: '2' }, { source: '2', target: '3' }, { source: '3', target: '4' }] });
   assert.deepEqual([...g.subgraph({ focus: ['1'], depth: 1 }).nodes.keys()].sort(), ['1', '2']);

@@ -1,0 +1,17 @@
+[
+  { "id": "kelly", "name": "Old Man Kelly", "type": "pc", "href": "characters/kelly.html" },
+  { "id": "enona", "name": "Enona", "type": "pc", "href": "characters/enona.html" },
+  { "id": "corinne", "name": "Corinne", "type": "pc", "href": "characters/corinne.html" },
+  { "id": "amber", "name": "Mirielle", "type": "pc", "href": "characters/amber.html" },
+  { "id": "nikki", "name": "Nikki", "type": "pc", "href": "characters/nikki.html" },
+  { "id": "sinder", "name": "Sinder", "type": "pc", "href": "characters/sinder.html" },
+  { "id": "suture", "name": "Suture", "type": "pc", "href": "characters/suture.html" },
+  { "id": "ship", "name": "The Ship", "type": "ship", "sub": "rename me", "href": "journals/captains-log.html", "demo": true },
+  { "id": "landfall", "name": "Landfall", "type": "event", "sub": "Session 1", "href": "journals/session-01.html", "demo": true },
+  { "id": "shark-teeth", "name": "Shark teeth", "type": "event", "sub": "Quest", "href": "quests/q_00001.html", "demo": true },
+  { "id": "note-captains-log", "name": "Captain’s log", "type": "note", "href": "journals/captains-log.html", "demo": true },
+  { "id": "note-tides", "name": "On the tides", "type": "note", "href": "essays/aether-tides.html", "demo": true },
+  { "id": "note-enona", "name": "Enona’s log", "type": "note", "href": "journals/enonas-log.html", "demo": true },
+  { "id": "note-suture", "name": "Suture’s log", "type": "note", "href": "journals/sutures-log.html", "demo": true },
+  { "id": "note-no-page", "name": "Loose thought", "type": "note", "demo": true }
+]

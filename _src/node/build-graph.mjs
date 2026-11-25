@@ -24,6 +24,13 @@ const GRAPHS = [{
   map: '_src/data/foundry-map.json',
   overlay: '_src/data/graph.json',
   out: 'AEExport/ws/data/graphs/crew-and-npcs.json'
+}, {
+  name: 'crew-ship',                                  // demo: the crew around one ship, with events and notes
+  foundry: 'tmp/party-live.json',
+  npcs: '_src/data/crew-ship.npcs.json',
+  map: '_src/data/foundry-map.json',
+  overlay: '_src/data/crew-ship.graph.json',
+  out: 'AEExport/ws/data/graphs/crew-ship.json'
 }];
 
 const read = (rel) => { const f = path.join(ROOT, rel); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null; };

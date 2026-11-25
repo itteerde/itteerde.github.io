@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "groups": {
+    "crew": { "label": "The Crew", "color": "#f0d589" }
+  },
+  "types": {
+    "ship": { "label": "Ship", "shape": "pyramid", "size": 2.6, "color": "#c9a24b" },
+    "event": { "label": "Event", "shape": "cube", "size": 1.3, "color": "#e08a3c" },
+    "note": { "label": "Note", "shape": "ring", "size": 0.9, "color": "#e8dcb0" }
+  },
+  "kinds": {
+    "crew": { "label": "Serves aboard", "color": "#c9a24b" },
+    "witnessed": { "label": "Took part in", "color": "#e08a3c" },
+    "note": { "label": "Note about", "color": "#cdbf8f" }
+  },
+  "nodes": [
+    { "id": "kelly", "group": "crew" },
+    { "id": "enona", "group": "crew" },
+    { "id": "corinne", "group": "crew" },
+    { "id": "amber", "group": "crew" },
+    { "id": "nikki", "group": "crew" },
+    { "id": "sinder", "group": "crew" },
+    { "id": "suture", "group": "crew" }
+  ],
+  "edges": [
+    { "source": "kelly", "target": "ship", "kind": "crew" },
+    { "source": "enona", "target": "ship", "kind": "crew" },
+    { "source": "corinne", "target": "ship", "kind": "crew" },
+    { "source": "amber", "target": "ship", "kind": "crew" },
+    { "source": "nikki", "target": "ship", "kind": "crew" },
+    { "source": "sinder", "target": "ship", "kind": "crew" },
+    { "source": "suture", "target": "ship", "kind": "crew" },
+    { "source": "kelly", "target": "landfall", "kind": "witnessed" },
+    { "source": "enona", "target": "landfall", "kind": "witnessed" },
+    { "source": "corinne", "target": "landfall", "kind": "witnessed" },
+    { "source": "amber", "target": "landfall", "kind": "witnessed" },
+    { "source": "nikki", "target": "landfall", "kind": "witnessed" },
+    { "source": "sinder", "target": "landfall", "kind": "witnessed" },
+    { "source": "suture", "target": "landfall", "kind": "witnessed" },
+    { "source": "ship", "target": "landfall", "kind": "witnessed" },
+    { "source": "nikki", "target": "shark-teeth", "kind": "witnessed" },
+    { "source": "sinder", "target": "shark-teeth", "kind": "witnessed" },
+    { "source": "suture", "target": "shark-teeth", "kind": "witnessed" },
+    { "source": "ship", "target": "shark-teeth", "kind": "witnessed" },
+    { "source": "note-captains-log", "target": "ship", "kind": "note" },
+    { "source": "note-tides", "target": "ship", "kind": "note" },
+    { "source": "note-enona", "target": "enona", "kind": "note" },
+    { "source": "note-suture", "target": "suture", "kind": "note" },
+    { "source": "note-no-page", "target": "landfall", "kind": "note", "label": "a note without a page" }
+  ]
+}

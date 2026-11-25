@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crew &amp; Ship – Connections – The Aetherial Expanse</title>
+<link rel="stylesheet" href="../css/aetherial.css">
+<link rel="stylesheet" href="../css/graph.css">
+<!-- three.js is vendored (js/graph/vendor, see js/graph/README.md). The import map must come before the module script. -->
+<script type="importmap">{"imports":{"three":"../js/graph/vendor/three.module.js","three/addons/":"../js/graph/vendor/addons/"}}</script>
+</head>
+<body data-root="../">
+<a class="skip" href="#main">Skip to content</a>
+<div class="site">
+  <main class="content" id="main">
+    <article class="sheet wide">
+      <ul class="crumbs"><li><a href="../index.html">Home</a></li><li><a href="index.html">Connections</a></li><li>Crew &amp; Ship</li></ul>
+      <header class="hero">
+        <h1>Crew &amp; Ship</h1>
+        <p>The crew, their ship, and the events and notes that tie them together.</p>
+      </header>
+
+      <!-- data-src: built graph (npm run graph). Add data-editable and open this page with ?edit=1 to edit.
+           Optional: data-focus="kelly" data-depth="2"  or  data-groups="navy,smugglers"  for a read-only part of the network. -->
+      <div class="graph" data-src="../data/graphs/crew-ship.json" data-editable data-export="crew-ship.graph.json">
+        <noscript>This map needs JavaScript. The people in it are listed on the <a href="../characters/index.html">Crew</a> and <a href="../contacts/index.html">Characters</a> pages.</noscript>
+      </div>
+
+      <p class="note"><strong>Controls.</strong> Drag to turn the map, scroll to zoom, right-drag to pan. Click a node to open its page (muted nodes have none yet). Double-click flies to a node. “Flat 2D” ignores depth if the 3D view gets confusing. <strong>Full window</strong> (button in the toolbar and in the map’s corner, or key <kbd>M</kbd>) gives the map the whole screen; <kbd>Esc</kbd> returns.</p>
+    </article>
+    <p class="foot">The Aetherial Expanse · Connections</p>
+  </main>
+</div>
+<script src="../js/site.js"></script>
+<script type="module" src="../js/graph/main.js"></script>
+</body>
+</html>

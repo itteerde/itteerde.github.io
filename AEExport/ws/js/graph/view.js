@@ -5,9 +5,21 @@
    Public surface used by the other modules: see the "API" comment blocks. */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { DEFAULTS, NODE_TYPES, EDGE_KINDS } from './config.js';
+import { DEFAULTS } from './config.js';
 
 const WHITE = new THREE.Color('#ffffff');
+/* Geometry per node shape (ids = SHAPES in config.js). All are scaled to a similar visual size. */
+const GEO = {
+  sphere: (seg) => new THREE.SphereGeometry(1, seg[0], seg[1]),
+  cube: () => new THREE.BoxGeometry(1.7, 1.7, 1.7),
+  diamond: () => new THREE.OctahedronGeometry(1.35),
+  pyramid: () => new THREE.TetrahedronGeometry(1.45),
+  cone: () => new THREE.ConeGeometry(1.05, 2.2, 20),
+  cylinder: () => new THREE.CylinderGeometry(0.95, 0.95, 1.9, 20),
+  hexagon: () => new THREE.CylinderGeometry(1.3, 1.3, 1.0, 6),
+  ring: () => new THREE.TorusGeometry(1.0, 0.42, 10, 24),
+  gem: () => new THREE.DodecahedronGeometry(1.25)
+};
 const _m = new THREE.Matrix4(), _c = new THREE.Color(), _e = new THREE.Color(), _v = new THREE.Vector3(), _n = new THREE.Vector3(), _ndc = new THREE.Vector2();
 
 export class GraphView {
@@ -31,6 +43,12 @@ export class GraphView {
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.Fog(this.bg, 1, 1000);
     this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 5000);
+    if (this.o.shaded) {      // headlight: the light travels with the camera, so shapes always read as 3D
+      this.scene.add(new THREE.AmbientLight(0xffffff, this.o.lightAmbient));
+      const sun = new THREE.DirectionalLight(0xffffff, this.o.lightDirect);
+      sun.position.set(0.5, 0.7, 1); sun.target.position.set(0, 0, -1);
+      this.camera.add(sun, sun.target); this.scene.add(this.camera);
+    }
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true; this.controls.dampingFactor = 0.12; this.controls.screenSpacePanning = true;
     this.controls.addEventListener('change', () => this.markDirty());
@@ -59,15 +77,27 @@ export class GraphView {
   }
 
   rebuild() {
-    if (this.mesh) { this.scene.remove(this.mesh, this.lines); this.mesh.geometry.dispose(); this.mesh.material.dispose(); this.mesh.dispose(); this.lines.geometry.dispose(); this.lines.material.dispose(); }
+    for (const m of this.meshes || []) { this.scene.remove(m.mesh); m.mesh.geometry.dispose(); m.mesh.material.dispose(); m.mesh.dispose(); }
+    if (this.lines) { this.scene.remove(this.lines); this.lines.geometry.dispose(); this.lines.material.dispose(); }
     this.list = [...this.graph.nodes.values()];
     this.ids = this.list.map((n) => n.id);
     this.index = new Map(this.ids.map((id, i) => [id, i]));
+    this.tdef = this.list.map((n) => this.graph.typeDef(n.type));
     const n = this.list.length;
+    // one InstancedMesh per shape in use; slot[i] says where node i lives
+    const byShape = new Map();
+    this.tdef.forEach((t, i) => { const s = GEO[t.shape] ? t.shape : 'sphere'; (byShape.get(s) || byShape.set(s, []).get(s)).push(i); });
     const seg = n > 3000 ? [6, 4] : n > 800 ? [10, 7] : [16, 12];
-    this.mesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, seg[0], seg[1]), new THREE.MeshBasicMaterial(), Math.max(n, 1));
-    this.mesh.count = n; this.mesh.frustumCulled = false;
-    this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.meshes = []; this.slot = new Array(n);
+    for (const [shape, idxs] of byShape) {
+      const mat = this.o.shaded ? new THREE.MeshLambertMaterial() : new THREE.MeshBasicMaterial();
+      const mesh = new THREE.InstancedMesh(GEO[shape](seg), mat, idxs.length);
+      mesh.count = idxs.length; mesh.frustumCulled = false;
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      this.scene.add(mesh);
+      this.meshes.push({ shape, mesh });
+      idxs.forEach((i, k) => { this.slot[i] = { mesh, k }; });
+    }
     this.edgeList = this.graph.edges.filter((e) => this.index.has(e.source) && this.index.has(e.target));
     const E = this.edgeList.length;
     const geo = new THREE.BufferGeometry();
@@ -75,14 +105,14 @@ export class GraphView {
     geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(E * 6), 3));
     this.lines = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ vertexColors: true }));
     this.lines.frustumCulled = false;
-    this.scene.add(this.mesh, this.lines);
+    this.scene.add(this.lines);
     this.disp = new Float32Array(n * 3); this.screen = new Float32Array(n * 3);
     this.updateMatrices(); this.updateStyle();
   }
 
   nodeScale(i) {
     const n = this.list[i];
-    let s = this.o.nodeRadius * (NODE_TYPES[n.type]?.size || 1) * (n.href ? 1 : 0.8);
+    let s = this.o.nodeRadius * (this.tdef[i].size || 1) * (n.href ? 1 : 0.8);
     if (this.selection.has(n.id)) s *= 1.6;
     if (this.hover === n.id) s *= 1.3;
     return s;
@@ -95,9 +125,9 @@ export class GraphView {
       d[i * 3] = p[0]; d[i * 3 + 1] = p[1]; d[i * 3 + 2] = p[2] * f;
       const s = this.nodeScale(i);
       _m.makeScale(s, s, s).setPosition(d[i * 3], d[i * 3 + 1], d[i * 3 + 2]);
-      this.mesh.setMatrixAt(i, _m);
+      this.slot[i].mesh.setMatrixAt(this.slot[i].k, _m);
     });
-    this.mesh.instanceMatrix.needsUpdate = true;
+    for (const { mesh } of this.meshes) mesh.instanceMatrix.needsUpdate = true;
     const pa = this.lines.geometry.attributes.position.array;
     this.edgeList.forEach((e, k) => {
       const a = this.index.get(e.source) * 3, b = this.index.get(e.target) * 3;
@@ -106,22 +136,23 @@ export class GraphView {
     this.lines.geometry.attributes.position.needsUpdate = true;
     this.markDirty();
   }
-  /** Selection / groups / labels changed: colours and scales (cheap, no geometry rebuild). */
+  /** Selection / groups / types / kinds changed: colours and scales (cheap, no geometry rebuild). */
   updateStyle() {
     if (!this.list) return;
     const sel = this.selection.ids, hasSel = sel.size > 0, near = new Set();
     if (hasSel) for (const e of this.edgeList) { if (sel.has(e.source)) near.add(e.target); if (sel.has(e.target)) near.add(e.source); }
     this.list.forEach((n, i) => {
-      const g = this.graph.groups[n.group];
-      _c.set(g?.color || this.o.ungroupedColor);
+      _c.set(this.graph.groups[n.group]?.color || this.tdef[i].color || this.o.ungroupedColor);
       if (!n.href) _c.lerp(this.bg, this.o.mutedMix);
       if (sel.has(n.id)) _c.lerp(WHITE, 0.4); else if (hasSel && !near.has(n.id)) _c.lerp(this.bg, 0.55);
-      this.mesh.setColorAt(i, _c);
+      this.slot[i].mesh.setColorAt(this.slot[i].k, _c);
     });
-    if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
-    const ca = this.lines.geometry.attributes.color.array;
+    for (const { mesh } of this.meshes) if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    const ca = this.lines.geometry.attributes.color.array, kindColor = new Map();
     this.edgeList.forEach((e, k) => {
-      _e.set((EDGE_KINDS[e.kind] || EDGE_KINDS.default).color);
+      const kind = e.kind || 'default';
+      if (!kindColor.has(kind)) kindColor.set(kind, this.graph.kindDef(kind).color);
+      _e.set(kindColor.get(kind));
       _e.lerp(this.bg, hasSel ? (sel.has(e.source) || sel.has(e.target) ? 0 : 0.88) : 0.4);
       _e.toArray(ca, k * 6); _e.toArray(ca, k * 6 + 3);
     });
@@ -135,9 +166,10 @@ export class GraphView {
       const i = this.index.get(x); if (i === undefined) continue;
       const s = this.nodeScale(i);
       _m.makeScale(s, s, s).setPosition(this.disp[i * 3], this.disp[i * 3 + 1], this.disp[i * 3 + 2]);
-      this.mesh.setMatrixAt(i, _m);
+      this.slot[i].mesh.setMatrixAt(this.slot[i].k, _m);
+      this.slot[i].mesh.instanceMatrix.needsUpdate = true;
     }
-    this.mesh.instanceMatrix.needsUpdate = true; this.dirty = true;
+    this.dirty = true;
   }
 
   /* ----------------------------------------------------------------- camera */

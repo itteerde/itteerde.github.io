@@ -82,3 +82,16 @@ html.graph-max-lock,html.graph-max-lock body{overflow:hidden}
 @media (max-width:60rem){
   .graph-app.is-max .graph-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,11rem)}
 }
+
+/* ---- node types & connection kinds (editor) ---- */
+.graph-chip .glyph,.graph-defrow .glyph{display:inline-block;width:1rem;text-align:center;flex:none;color:var(--ink)}
+.graph-defs{margin-top:1rem}
+.graph-defs>summary{cursor:pointer;font-family:var(--font-head)}
+.graph-defs h3{margin:.8rem 0 .2rem;font-size:1rem}
+.graph-defs-list{list-style:none;margin:.3rem 0;padding:0}
+.graph-defrow{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;margin:.35rem 0;padding-bottom:.35rem;border-bottom:1px dotted var(--brass-lo)}
+.graph-defrow>input:not([type]),.graph-defrow>input[type=text]{flex:1 1 7rem;min-width:0}
+.graph-defrow>select{flex:1 1 9rem;min-width:0}
+.graph-defrow input[type=number]{width:3.8rem}
+.graph-defrow input[type=color]{width:2.2rem;padding:0}
+.graph-defrow .line{display:inline-block;width:1.4rem;height:3px;flex:none}

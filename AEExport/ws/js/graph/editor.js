@@ -66,3 +66,21 @@ export class SetGroupDef {
   do(g) { g.setGroupDef(this.id, this.def && { ...this.def }); }
   undo(g) { g.setGroupDef(this.id, this.prev && { ...this.prev }); }
 }
+export class SetTypeDef {
+  /** Add or change a node type (def undefined = remove an added type). */
+  constructor(g, id, def) { this.id = id; this.def = def; this.prev = g.types[id] ? { ...g.types[id] } : undefined; this.label = 'Edit node type'; }
+  do(g) { g.setTypeDef(this.id, this.def && { ...this.def }); }
+  undo(g) { g.setTypeDef(this.id, this.prev && { ...this.prev }); }
+}
+export class SetKindDef {
+  /** Add or change a connection kind (colour, label). */
+  constructor(g, id, def) { this.id = id; this.def = def; this.prev = g.kinds[id] ? { ...g.kinds[id] } : undefined; this.label = 'Edit connection kind'; }
+  do(g) { g.setKindDef(this.id, this.def && { ...this.def }); }
+  undo(g) { g.setKindDef(this.id, this.prev && { ...this.prev }); }
+}
+export class AddEdges {
+  /** Several connections as one undo step. */
+  constructor(edges) { this.edges = edges; this.label = `Connect ${edges.length}`; }
+  do(g) { g.addEdges(this.edges); }
+  undo(g) { g.removeEdges(this.edges); }
+}

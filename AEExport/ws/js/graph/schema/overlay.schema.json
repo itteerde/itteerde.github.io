@@ -2,17 +2,150 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Graph overlay (_src/data/graph.json)",
   "type": "object",
-  "required": ["version"],
+  "required": [
+    "version"
+  ],
   "properties": {
-    "version": { "const": 1 },
-    "groups": { "type": "object", "additionalProperties": { "type": "object", "required": ["color"], "properties": { "label": { "type": "string" }, "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } } } },
-    "nodes": { "type": "array", "items": { "type": "object", "required": ["id"], "properties": {
-      "id": { "type": "string" }, "group": { "type": "string" },
-      "pos": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
-      "label": { "type": "string", "description": "only for stubs created in the editor" },
-      "sub": { "type": "string" }, "type": { "type": "string" }, "href": { "type": "string" } } } },
-    "edges": { "type": "array", "items": { "type": "object", "required": ["source", "target"], "properties": {
-      "source": { "type": "string" }, "target": { "type": "string" }, "kind": { "type": "string" }, "label": { "type": "string" } } } },
-    "exclude": { "type": "array", "items": { "type": "string" }, "description": "source nodes left out of this graph" }
+    "version": {
+      "const": 1
+    },
+    "groups": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "color"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "group": {
+            "type": "string"
+          },
+          "pos": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "label": {
+            "type": "string",
+            "description": "only for stubs created in the editor"
+          },
+          "sub": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "target"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "source nodes left out of this graph"
+    },
+    "types": {
+      "type": "object",
+      "description": "node types added to / overriding the built-in ones (config.js)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "shape": {
+            "enum": [
+              "sphere",
+              "cube",
+              "diamond",
+              "pyramid",
+              "cone",
+              "cylinder",
+              "hexagon",
+              "ring",
+              "gem"
+            ]
+          },
+          "size": {
+            "type": "number",
+            "minimum": 0.3,
+            "maximum": 4
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "description": "used for nodes without a group"
+          }
+        }
+      }
+    },
+    "kinds": {
+      "type": "object",
+      "description": "connection kinds added to / overriding the built-in ones (config.js)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        }
+      }
+    }
   }
 }

@@ -1,7 +1,7 @@
 /* ui.js – everything made of HTML: toolbar, legend, inspector, node list, shortcuts, export, drafts.
    Two steps: buildShell() creates the empty page structure (so the view has a stage to draw into),
    attachUI() fills it and wires it to graph / view / selection / history. */
-import { EDGE_KINDS, NODE_TYPES } from './config.js';
+import { SHAPES } from './config.js';
 import { slugify } from './model.js';
 import * as C from './editor.js';
 import { runLayout } from './layout.js';
@@ -42,11 +42,15 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
   const sel = () => [...selection.ids];
   const A = {
     undo: () => history.undo(), redo: () => history.redo(),
+    /** Two nodes: connect them. More: connect every other selected node to the one selected LAST (the hub, e.g. an event). */
     connect() {
-      const [a, b] = sel();
-      if (selection.size !== 2) return say('Select exactly two nodes to connect.');
-      if (graph.hasEdge(a, b)) return say('These two are already connected.');
-      history.exec(new C.AddEdge({ source: a, target: b }));
+      const ids = sel();
+      if (ids.length < 2) return say('Select two or more nodes to connect (with more than two, the last selected is the hub).');
+      const hub = ids.at(-1), kind = kindPick.value === 'default' ? undefined : kindPick.value;
+      const edges = ids.slice(0, -1).filter((id) => !graph.hasEdge(id, hub, kind)).map((id) => ({ source: id, target: hub, ...(kind ? { kind } : {}) }));
+      if (!edges.length) return say('Already connected.');
+      history.exec(new C.AddEdges(edges));
+      say(`Connected ${edges.length} node${edges.length === 1 ? '' : 's'} to “${graph.nodes.get(hub).label}”.`);
     },
     remove() {
       if (!selection.size) return;
@@ -72,7 +76,14 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
   const btn = (label, fn, title, extra = {}) => h('button', { type: 'button', class: 'btn ghost', title, onclick: fn, ...extra }, label);
   const search = h('input', { type: 'search', class: 'graph-search', placeholder: 'Find…', list: 'graph-names', 'aria-label': 'Find a node' });
   const names = h('datalist', { id: 'graph-names' });
-  const refreshNames = () => { names.textContent = ''; for (const n of graph.nodes.values()) names.append(h('option', { value: n.label })); };
+  const hrefList = h('datalist', { id: 'graph-hrefs' });
+  const kindPick = h('select', { class: 'graph-select', title: 'Kind of the connections that “Connect” creates', 'aria-label': 'Kind for new connections' });
+  const refreshNames = () => {
+    names.textContent = ''; for (const n of graph.nodes.values()) names.append(h('option', { value: n.label }));
+    hrefList.textContent = ''; for (const href of new Set([...graph.nodes.values()].map((n) => n.href).filter(Boolean))) hrefList.append(h('option', { value: href }));
+    const keep = kindPick.value || 'default';
+    kindPick.textContent = ''; for (const [k, d] of graph.allKinds()) kindPick.append(h('option', { value: k, selected: k === keep }, d.label));
+  };
   const jump = () => {
     const q = search.value.trim().toLowerCase(); if (!q) return;
     const all = [...graph.nodes.values()];
@@ -90,14 +101,14 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
   if (edit) {
     undoB = btn('↶ Undo', A.undo, 'Ctrl+Z'); redoB = btn('↷ Redo', A.redo, 'Ctrl+Shift+Z');
     selB = h('button', { type: 'button', class: 'btn ghost', 'aria-pressed': 'false', title: 'Drag on empty space to box-select (touch screens; with a mouse: Shift+drag)', onclick: () => { interaction.selectMode = !interaction.selectMode; selB.setAttribute('aria-pressed', interaction.selectMode); } }, 'Select mode');
-    conB = btn('Connect', A.connect, 'Connect the two selected nodes (C)');
+    conB = btn('Connect', A.connect, 'Connect the selected nodes (C): two nodes, or all to the last selected one. The kind is chosen in the list next to it');
     delB = btn('Delete', A.remove, 'Delete selected nodes (Del)');
     expB = h('details', { class: 'graph-export' }, h('summary', { class: 'btn' }, 'Export JSON'),
       h('div', { class: 'graph-export-menu' },
         btn('Download', A.download, 'Download ' + exportName),
         btn('Copy', A.copy, 'Copy to clipboard'),
         canSaveInPlace ? btn('Save in place…', A.save, 'Overwrite _src/data/graph.json directly (Chrome / Edge)') : null));
-    toolbar.append(undoB, redoB, selB, conB, h('button', { type: 'button', class: 'btn ghost', onclick: A.relayout, title: 'Re-run the force layout (only the selected nodes, if any)' }, 'Relayout'), delB, expB);
+    toolbar.append(undoB, redoB, selB, conB, kindPick, hrefList, h('button', { type: 'button', class: 'btn ghost', onclick: A.relayout, title: 'Re-run the force layout (only the selected nodes, if any)' }, 'Relayout'), delB, expB);
   }
   /* --------------------------------------------------------- full window
      "is-max" turns the whole .graph-app (toolbar, stage, side panel) into a fixed full-window layer and, where the browser
@@ -141,8 +152,18 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
     }, h('i', { style: `background:${color}` }), label, h('small', {}, String(counts[id] || 0)));
     for (const [id, g] of Object.entries(graph.groups)) legend.append(chip(id, g.label || id, g.color));
     if (counts['']) legend.append(chip('', 'Unassigned', view.o.ungroupedColor));
+    const used = {}; for (const n of graph.nodes.values()) used[n.type || 'npc'] = (used[n.type || 'npc'] || 0) + 1;
+    if (Object.keys(used).length > 1) {
+      legend.append(h('h3', {}, 'Types'));
+      for (const [id, count] of Object.entries(used)) {
+        const t = graph.typeDef(id);
+        legend.append(h('button', { type: 'button', class: 'graph-chip', title: 'Select all of this type (Shift: add)',
+          onclick: (e) => { const ids = [...graph.nodes.values()].filter((n) => (n.type || 'npc') === id).map((n) => n.id); e.shiftKey ? selection.add(ids) : selection.set(ids); } },
+          h('span', { class: 'glyph' }, SHAPES[t.shape]?.glyph || '●'), t.label, h('small', {}, String(count))));
+      }
+    }
     const kinds = [...new Set(graph.edges.map((e) => e.kind || 'default'))];
-    if (kinds.length) legend.append(h('h3', {}, 'Connections'), h('ul', { class: 'graph-kinds' }, ...kinds.map((k) => h('li', {}, h('i', { class: 'line', style: `background:${(EDGE_KINDS[k] || EDGE_KINDS.default).color}` }), (EDGE_KINDS[k] || { label: k }).label))));
+    if (kinds.length) legend.append(h('h3', {}, 'Connections'), h('ul', { class: 'graph-kinds' }, ...kinds.map((k) => h('li', {}, h('i', { class: 'line', style: `background:${graph.kindDef(k).color}` }), graph.kindDef(k).label))));
   };
 
   /* ----------------------------------------------------------- inspector */
@@ -153,7 +174,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
     h('option', { value: '', selected: !multi && !value }, '(none)'),
     ...Object.entries(graph.groups).map(([id, g]) => h('option', { value: id, selected: !multi && id === value }, g.label || id)));
   const kindSelect = (value, onchange) => h('select', { onchange: (e) => onchange(e.target.value) },
-    ...Object.entries(EDGE_KINDS).map(([k, d]) => h('option', { value: k, selected: (value || 'default') === k }, d.label)));
+    ...graph.allKinds().map(([k, d]) => h('option', { value: k, selected: (value || 'default') === k }, d.label)));
 
   const renderInspector = () => {
     insp.textContent = '';
@@ -163,7 +184,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
       const own = n.src === 'overlay';
       insp.append(h('h3', {}, n.label), n.sub ? h('p', { class: 'muted' }, n.sub) : null);
       if (!edit) {
-        insp.append(h('p', {}, (graph.groups[n.group]?.label || ''), n.type ? ` · ${NODE_TYPES[n.type]?.label || n.type}` : ''));
+        insp.append(h('p', {}, (graph.groups[n.group]?.label || ''), n.type ? ` · ${graph.typeDef(n.type).label}` : ''));
         insp.append(n.href ? h('a', { class: 'btn', href: (document.body.dataset.root || '') + n.href }, 'Open page') : h('p', { class: 'muted' }, 'No page for this one (yet).'));
         const nb = graph.edgesOf(n.id);
         if (nb.length) insp.append(h('h3', {}, 'Connected to'), h('ul', { class: 'graph-links' }, ...nb.map((e) => { const o = graph.nodes.get(e.source === n.id ? e.target : e.source); return h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); selection.set([o.id]); view.flyTo([o.id]); } }, o.label), e.label ? ` – ${e.label}` : ''); })));
@@ -173,8 +194,8 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
       insp.append(
         field('Name', h('input', { value: n.label, disabled: !own, onchange: upd('label') })),
         field('Subline', h('input', { value: n.sub || '', disabled: !own, onchange: upd('sub') })),
-        field('Type', h('select', { disabled: !own, onchange: upd('type') }, ...Object.entries(NODE_TYPES).map(([k, t]) => h('option', { value: k, selected: n.type === k }, t.label)))),
-        field('Page', h('input', { value: n.href || '', disabled: !own, placeholder: 'contacts/c_00002.html', onchange: upd('href') })),
+        field('Type', h('select', { disabled: !own, onchange: upd('type') }, ...graph.allTypes().map(([k, t]) => h('option', { value: k, selected: n.type === k }, t.label)))),
+        field('Page', h('input', { value: n.href || '', disabled: !own, placeholder: 'journals/session-01.html', list: 'graph-hrefs', onchange: upd('href') })),
         field('Group', groupSelect(n.group, (v) => history.exec(new C.SetGroup(graph, [n.id], v)))),
         h('p', { class: 'muted' }, `id: ${n.id} · from ${own ? 'this editor (stub)' : n.src}` + (own ? '' : ' – name, subline and page are edited in the source file')));
       const g = graph.groups[n.group];
@@ -192,7 +213,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
     } else if (ids.length > 1) {
       insp.append(h('h3', {}, `${ids.length} nodes selected`));
       if (edit) insp.append(field('Set group', groupSelect('', (v) => { if (v !== '\0') history.exec(new C.SetGroup(graph, ids, v)); }, true)),
-        ids.length === 2 ? btn('Connect the two', A.connect) : null, btn('Delete selected', A.remove));
+        btn(ids.length === 2 ? 'Connect the two' : 'Connect all to the last selected', A.connect), btn('Delete selected', A.remove));
       else insp.append(h('ul', { class: 'graph-links' }, ...ids.slice(0, 30).map((id) => h('li', {}, graph.nodes.get(id).label))));
     } else {
       insp.append(h('p', { class: 'muted' }, edit
@@ -203,7 +224,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
   };
 
   const addForms = () => {
-    const name = h('input', { placeholder: 'Name of the new node' }), type = h('select', {}, ...Object.entries(NODE_TYPES).map(([k, t]) => h('option', { value: k, selected: k === 'npc' }, t.label)));
+    const name = h('input', { placeholder: 'Name of the new node' }), type = h('select', {}, ...graph.allTypes().map(([k, t]) => h('option', { value: k, selected: k === 'npc' }, t.label)));
     const preview = h('small', { class: 'muted' }, ' ');
     const idOf = () => slugify(name.value);
     name.addEventListener('input', () => { const id = idOf(); preview.textContent = id ? (graph.nodes.has(id) ? `id “${id}” is taken` : `id: ${id}`) : ' '; });
@@ -226,7 +247,50 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
       h('div', { class: 'graph-row' }, gl, gc, btn('Add group', addGroup)),
       h('small', { class: 'muted' }, 'A new group is applied to the selected nodes.'));
   };
+  /* --------------------------------------- node types & connection kinds (editor) */
+  const defs = h('details', { class: 'graph-defs' }, h('summary', {}, 'Node types & connection kinds'));
+  const shapeSelect = (value, onchange) => h('select', { 'aria-label': 'Shape', onchange: (e) => onchange(e.target.value) },
+    ...Object.entries(SHAPES).map(([k, d]) => h('option', { value: k, selected: k === value }, `${d.glyph} ${d.label}`)));
+  const clean = (o) => { for (const k of Object.keys(o)) if (o[k] === undefined) delete o[k]; return o; };
+  const renderDefs = () => {
+    const head = defs.firstChild; defs.textContent = ''; defs.append(head);
+    // --- types
+    defs.append(h('h3', {}, 'Node types'), h('p', { class: 'muted' }, 'Shape and size; the colour box sets a colour for nodes that have no group.'));
+    defs.append(h('ul', { class: 'graph-defs-list' }, ...graph.allTypes().map(([id, t]) => {
+      const set = (patch) => history.exec(new C.SetTypeDef(graph, id, clean({ label: t.label, shape: t.shape, size: t.size, color: t.color, ...patch })));
+      const col = h('input', { type: 'color', value: t.color || '#c9a24b', disabled: !t.color, 'aria-label': 'Colour', onchange: (e) => set({ color: e.target.value }) });
+      return h('li', { class: 'graph-defrow' },
+        h('span', { class: 'glyph', title: id }, SHAPES[t.shape]?.glyph || '●'),
+        h('input', { value: t.label, 'aria-label': 'Name', onchange: (e) => set({ label: e.target.value.trim() || t.label }) }),
+        shapeSelect(t.shape, (v) => set({ shape: v })),
+        h('input', { type: 'number', min: '0.3', max: '4', step: '0.1', value: String(t.size), 'aria-label': 'Size', title: 'Size', onchange: (e) => set({ size: Math.min(4, Math.max(0.3, +e.target.value || 1)) }) }),
+        h('input', { type: 'checkbox', checked: !!t.color, title: 'Use a colour for nodes without a group', onchange: (e) => set({ color: e.target.checked ? col.value : undefined }) }), col);
+    })));
+    const tn = h('input', { placeholder: 'New type, e.g. Event' }), ts = shapeSelect('cube', () => { });
+    defs.append(h('div', { class: 'graph-row' }, tn, ts, btn('Add type', () => {
+      const id = slugify(tn.value); if (!id) return say('Give the type a name.');
+      if (graph.allTypes().some(([k]) => k === id)) return say(`Type “${id}” exists.`);
+      history.exec(new C.SetTypeDef(graph, id, { label: tn.value.trim(), shape: ts.value, size: 1.2 })); tn.value = '';
+    })));
+    // --- kinds
+    defs.append(h('h3', {}, 'Connection kinds'));
+    defs.append(h('ul', { class: 'graph-defs-list' }, ...graph.allKinds().map(([id, d]) => {
+      const set = (patch) => history.exec(new C.SetKindDef(graph, id, { label: d.label, color: d.color, ...patch }));
+      return h('li', { class: 'graph-defrow kind' },
+        h('i', { class: 'line', style: `background:${d.color}` }),
+        h('input', { value: d.label, 'aria-label': 'Name', onchange: (e) => set({ label: e.target.value.trim() || d.label }) }),
+        h('input', { type: 'color', value: d.color, 'aria-label': 'Colour', onchange: (e) => set({ color: e.target.value }) }));
+    })));
+    const kn = h('input', { placeholder: 'New kind, e.g. Witnessed' }), kc = h('input', { type: 'color', value: '#d98f4a', 'aria-label': 'Colour' });
+    defs.append(h('div', { class: 'graph-row' }, kn, kc, btn('Add kind', () => {
+      const id = slugify(kn.value); if (!id) return say('Give the kind a name.');
+      if (graph.allKinds().some(([k]) => k === id)) return say(`Kind “${id}” exists.`);
+      history.exec(new C.SetKindDef(graph, id, { label: kn.value.trim(), color: kc.value })); kn.value = '';
+    })));
+    defs.append(h('small', { class: 'muted' }, 'Types and kinds you add can be renamed and recoloured here; removing them means deleting their line in graph.json.'));
+  };
   side.append(insp, legend);
+  if (edit) side.append(defs);
 
   /* ------------------------------------------------------------ node list */
   const renderList = () => {
@@ -239,7 +303,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
   };
 
   /* ------------------------------------------------------------- wiring */
-  const refreshAll = () => { renderLegend(); renderInspector(); renderList(); refreshNames(); };
+  const refreshAll = () => { renderLegend(); renderInspector(); renderList(); refreshNames(); if (edit) renderDefs(); };
   graph.on((e) => {
     if (e.kind === 'move') return;
     if (e.kind === 'structure') selection.set(sel().filter((id) => graph.nodes.has(id)));
@@ -254,7 +318,7 @@ export function attachUI(shell, { graph, view, selection, history, interaction, 
       undoB.title = 'Undo' + (history.undoLabel ? ': ' + history.undoLabel : '') + ' (Ctrl+Z)';
       expB.firstChild.textContent = history.dirty ? 'Export JSON •' : 'Export JSON';
     };
-    const syncSel = () => { delB.disabled = !selection.size; conB.disabled = selection.size !== 2; };
+    const syncSel = () => { delB.disabled = !selection.size; conB.disabled = selection.size < 2; };
     let t; history.on(() => { syncButtons(); clearTimeout(t); t = setTimeout(() => history.dirty ? writeDraft(srcUrl, A.exportText()) : clearDraft(srcUrl), 400); });
     selection.on(syncSel); syncButtons(); syncSel();
     addEventListener('beforeunload', (e) => { if (history.dirty) { e.preventDefault(); e.returnValue = ''; } });
