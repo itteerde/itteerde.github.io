@@ -28,7 +28,7 @@
     { "id": "shark-teeth", "label": "Shark teeth", "sub": "Quest", "type": "event", "href": "quests/q_00001.html", "pos": [22.3, -4.5, -43.2], "src": "npcs", "demo": true },
     { "id": "ship", "label": "The Ship", "sub": "rename me", "type": "ship", "href": "journals/captains-log.html", "pos": [6.1, 11.9, -12.6], "src": "npcs", "demo": true },
     { "id": "sinder", "label": "Sinder Jack Marrow", "sub": "Master Gunner", "type": "pc", "group": "crew", "href": "characters/sinder.html", "pos": [4.5, 17.4, -42.2], "src": "foundry", "foundry": "aty1EvOcmp1D8Avd" },
-    { "id": "suture", "label": "Suture", "type": "pc", "group": "crew", "href": "characters/suture.html", "pos": [34.1, -1.2, -15.2], "src": "foundry", "foundry": "m8PlmFST5MscpRrs", "sub:": "Surgeon" }
+    { "id": "suture", "label": "Suture", "sub": "Surgeon", "type": "pc", "group": "crew", "href": "characters/suture.html", "pos": [34.1, -1.2, -15.2], "src": "foundry", "foundry": "m8PlmFST5MscpRrs" }
   ],
   "edges": [
     { "source": "amber", "target": "landfall", "kind": "witnessed" },

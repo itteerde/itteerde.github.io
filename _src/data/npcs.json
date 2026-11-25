@@ -5,7 +5,7 @@
   { "id": "amber", "name": "Mirielle Sunshadow", "sub":"Navigator", "type": "pc", "href": "characters/amber.html" },
   { "id":"nikki", "name": "Nikki Doboro", "sub":"Helmswoman", "type": "pc", "href": "characters/nikki.html" },
   { "id":"sinder", "name": "Sinder Jack Marrow", "sub":"Master Gunner", "type": "pc", "href": "characters/sinder.html" },
-  { "id":"suture", "name": "Suture", "sub:":"Surgeon", "type": "pc", "href": "characters/suture.html" },
+  { "id":"suture", "name": "Suture", "sub":"Surgeon", "type": "pc", "href": "characters/suture.html" },
   { "name": "Commodore Thorne", "sub": "Fleet commander", "demo": true },
   { "name": "Admiral Corvane", "sub": "Admiralty", "demo": true },
   { "name": "Captain Hale", "sub": "HMS Resolute", "demo": true },

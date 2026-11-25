@@ -5,7 +5,7 @@
   { "id": "amber", "name": "Mirielle Sunshadow", "sub":"Navigator", "type": "pc", "href": "characters/amber.html" },
   { "id":"nikki", "name": "Nikki Doboro", "sub":"Helmswoman", "type": "pc", "href": "characters/nikki.html" },
   { "id":"sinder", "name": "Sinder Jack Marrow", "sub":"Master Gunner", "type": "pc", "href": "characters/sinder.html" },
-  { "id":"suture", "name": "Suture", "sub:":"Surgeon", "type": "pc", "href": "characters/suture.html" },
+  { "id":"suture", "name": "Suture", "sub":"Surgeon", "type": "pc", "href": "characters/suture.html" },
   { "id": "ship", "name": "The Ship", "type": "ship", "sub": "rename me", "href": "journals/captains-log.html", "demo": true },
   { "id": "landfall", "name": "Landfall", "type": "event", "sub": "Session 1", "href": "journals/session-01.html", "demo": true },
   { "id": "shark-teeth", "name": "Shark teeth", "type": "event", "sub": "Quest", "href": "quests/q_00001.html", "demo": true },
