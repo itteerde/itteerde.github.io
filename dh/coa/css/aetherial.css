@@ -104,6 +104,32 @@ a.card:hover{border-color:var(--blood);box-shadow:0 8px 16px rgba(60,35,10,.35)}
 .pips.hope .pip.on{background:var(--brass)}
 .pips.stress .pip.on{background:var(--teal)}
 
+/* ---- Mourning ribbon modifier ---- */
+.portrait.mourning {
+  overflow: hidden; /* clips the diagonal ribbon cleanly at the frame edge */
+}
+
+/* Optional: slightly desaturate the portrait */
+.portrait.mourning img,
+.portrait.mourning .frame {
+  filter: grayscale(65%) contrast(1.05);
+}
+
+/* Diagonal black silk ribbon across the top-right corner */
+.portrait.mourning::after {
+  content: "";
+  position: absolute;
+  top: 1.4rem;
+  right: -2.4rem;
+  width: 8.5rem;
+  height: 1.5rem;
+  transform: rotate(45deg);
+  pointer-events: none;
+  background: linear-gradient(180deg, #24201e, #0a0908 50%, #1c1816);
+  border-block: 1px solid var(--brass-lo);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
+}
+
 /* ---- Journals, session logs ---- */
 .meta{display:flex;flex-wrap:wrap;gap:.3rem 1.6rem;margin:.6rem 0 1.4rem;padding:.5rem 0;border-block:1px solid var(--brass-lo);font-size:.95rem;color:var(--ink-soft)}
 .timeline{list-style:none;margin:1.5rem 0;padding:0 0 0 1.8rem;border-left:3px double var(--brass-lo)}

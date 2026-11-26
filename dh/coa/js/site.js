@@ -4,7 +4,7 @@
   const root = document.body.dataset.root || '';
   const NAV = [
     ['Home', 'index.html'],
-    ['The Party', 'characters/index.html', [['Lome', 'characters/lome.html'], ['Enona', 'characters/enona.html'], ['Corinne', 'characters/corinne.html'], ['Mirielle', 'characters/amber.html'], ['Nikki', 'characters/nikki.html'], ['Sinder', 'characters/sinder.html'], ['Suture', 'characters/suture.html']]],
+    ['The Party', 'characters/index.html', [['Lome', 'characters/lome.html'], ['Hannibal', 'characters/hannibal.html'], ['Glafourra', 'characters/glafourra.html'], ['Thistle', 'characters/thistle.html'], ['Arielle', 'characters/arielle.html'], ['Nyx', 'characters/nyx.html'], ['Caleb', 'characters/caleb.html']]],
     ['Journals', 'journals/index.html', [['Captain’s Log', 'journals/captains-log.html'], ['Enona’s Log', 'journals/enonas-log.html'], ['Corinne’s Log', 'journals/corinnes-log.html'], ['Mirielle’s Log', 'journals/ambers-log.html'], ['Nikki’s Log', 'journals/nikkis-log.html'], ['Sinder’s Log', 'journals/sinders-log.html'], ['Suture’s Log', 'journals/sutures-log.html'], ['Session 1: Landfall', 'journals/session-01.html']]],
     ['Quests', 'quests/index.html', [['Collecting 42 Shark Teeth', 'quests/q_00001.html'], ['Collecting 43 Shark Teeth', 'quests/q_00002.html']]],
     ['Characters', 'contacts/index.html', [['Isolde Varrow', 'contacts/c_00001.html']]],
