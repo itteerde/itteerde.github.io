@@ -9,6 +9,7 @@
     ['Quests', 'quests/index.html', [['Collecting 42 Shark Teeth', 'quests/q_00001.html'], ['Collecting 43 Shark Teeth', 'quests/q_00002.html']]],
     ['Connections', 'connections/index.html', [['All', 'connections/all.html']]],
     ['Characters', 'contacts/index.html', [['Isolde Varrow', 'contacts/c_00001.html']]],
+    ['Essays', 'essays/index.html', [['Celsian Athenaeum', 'essays/celsian-athenaeum']]]
   ];
   const url = h => root + h;
   // Compare paths without ".html", "index.html" or a trailing slash, so pretty-URL servers (serve, Netlify, Cloudflare Pages) still match.
