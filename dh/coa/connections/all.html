@@ -21,11 +21,12 @@
 </style>
 </head>
 <body data-root="../">
-    <div id="graph" data-graphscape data-config="graphs/skin.json"
-        data-theme="dark" data-dimension="2d"></div>
+    <div id="graph" data-graphscape data-theme="dark" data-dimension="2d"></div>
     <script>
       const fiveMinBucket = Math.floor(Date.now() / (5 * 60 * 1000));
+      const thirtyMinBucket = Math.floor(Date.now() / (5 * 60 * 1000));
       document.getElementById('graph').setAttribute('data-src', 'graphs/all.json?t=' + fiveMinBucket);
+      document.getElementById('graph').setAttribute('data-config', 'graphs/skin.json?t=' + thirtyMinBucket);
     </script>
     <script src="../../graphscale/standalone/graphscape.standalone.js"></script>
 </body>

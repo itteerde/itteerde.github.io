@@ -1,0 +1,173 @@
+{
+  "format": "graphscape",
+  "version": 1,
+  "directed": false,
+  "meta": {
+    "title": "Small social network"
+  },
+  "nodes": [
+    {
+      "id": "ada",
+      "label": "Ada",
+      "group": "Engineering",
+      "url": "people/ada.html",
+      "sublabel": "Tech lead",
+      "shape": "diamond"
+    },
+    {
+      "id": "ben",
+      "label": "Ben",
+      "group": "Engineering"
+    },
+    {
+      "id": "cleo",
+      "label": "Cleo",
+      "group": "Engineering",
+      "sublabel": "Backend"
+    },
+    {
+      "id": "dan",
+      "label": "Dan",
+      "group": "Engineering"
+    },
+    {
+      "id": "eva",
+      "label": "Eva",
+      "group": "Design",
+      "sublabel": "Design lead",
+      "shape": "diamond"
+    },
+    {
+      "id": "finn",
+      "label": "Finn",
+      "group": "Design",
+      "shape": "triangle"
+    },
+    {
+      "id": "gia",
+      "label": "Gia",
+      "group": "Design",
+      "shape": "hexagon"
+    },
+    {
+      "id": "hugo",
+      "label": "Hugo",
+      "group": "Sales",
+      "sublabel": "Sales lead",
+      "shape": "diamond"
+    },
+    {
+      "id": "ivy",
+      "label": "Ivy",
+      "group": "Sales"
+    },
+    {
+      "id": "jon",
+      "label": "Jon",
+      "group": "Sales"
+    },
+    {
+      "id": "kim",
+      "label": "Kim",
+      "group": "Sales",
+      "shape": "square"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "ada",
+      "target": "ben",
+      "weight": 3
+    },
+    {
+      "id": "e2",
+      "source": "ada",
+      "target": "cleo",
+      "weight": 2
+    },
+    {
+      "id": "e3",
+      "source": "ben",
+      "target": "cleo"
+    },
+    {
+      "id": "e4",
+      "source": "cleo",
+      "target": "dan"
+    },
+    {
+      "id": "e5",
+      "source": "ada",
+      "target": "dan"
+    },
+    {
+      "id": "e6",
+      "source": "eva",
+      "target": "finn",
+      "weight": 4
+    },
+    {
+      "id": "e7",
+      "source": "finn",
+      "target": "gia"
+    },
+    {
+      "id": "e8",
+      "source": "eva",
+      "target": "gia"
+    },
+    {
+      "id": "e9",
+      "source": "hugo",
+      "target": "ivy"
+    },
+    {
+      "id": "e10",
+      "source": "ivy",
+      "target": "jon",
+      "weight": 2
+    },
+    {
+      "id": "e11",
+      "source": "jon",
+      "target": "kim"
+    },
+    {
+      "id": "e12",
+      "source": "hugo",
+      "target": "kim"
+    },
+    {
+      "id": "e13",
+      "source": "ada",
+      "target": "eva",
+      "label": "mentor",
+      "url": "notes/mentoring.html"
+    },
+    {
+      "id": "e14",
+      "source": "ada",
+      "target": "eva",
+      "weight": 2.5,
+      "label": "pairing"
+    },
+    {
+      "id": "e15",
+      "source": "gia",
+      "target": "hugo",
+      "weight": 0.5
+    },
+    {
+      "id": "e16",
+      "source": "dan",
+      "target": "ivy"
+    },
+    {
+      "id": "e17",
+      "source": "kim",
+      "target": "kim",
+      "label": "talks to self"
+    }
+  ]
+}

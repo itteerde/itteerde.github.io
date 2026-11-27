@@ -1,0 +1,34 @@
+{
+  "format": "graphscape",
+  "version": 1,
+  "directed": true,
+  "meta": { "title": "Evolution of life (simplified)" },
+  "nodes": [
+    { "id": "luca", "label": "LUCA", "color": "#7a5c99" },
+    { "id": "bacteria", "label": "Bacteria", "group": "Domains" },
+    { "id": "archaea", "label": "Archaea", "group": "Domains", "url": "pages/archaea.html" },
+    { "id": "eukarya", "label": "Eukarya", "group": "Domains" },
+    { "id": "plants", "label": "Plants", "group": "Kingdoms" },
+    { "id": "fungi", "label": "Fungi", "group": "Kingdoms" },
+    { "id": "animals", "label": "Animals", "group": "Kingdoms", "url": "pages/animals.html" },
+    { "id": "fish", "label": "Fish", "group": "Animals" },
+    { "id": "amphibians", "label": "Amphibians", "group": "Animals" },
+    { "id": "reptiles", "label": "Reptiles", "group": "Animals" },
+    { "id": "birds", "label": "Birds", "group": "Animals" },
+    { "id": "mammals", "label": "Mammals", "group": "Animals" }
+  ],
+  "edges": [
+    { "source": "luca", "target": "bacteria", "weight": 3.5, "label": "Ga" },
+    { "source": "luca", "target": "archaea", "weight": 3.5 },
+    { "source": "archaea", "target": "eukarya", "weight": 2 },
+    { "source": "bacteria", "target": "eukarya", "weight": 2, "dashed": true, "label": "endosymbiosis" },
+    { "source": "eukarya", "target": "plants", "weight": 1.5 },
+    { "source": "eukarya", "target": "fungi", "weight": 1.2 },
+    { "source": "eukarya", "target": "animals", "weight": 1.2 },
+    { "source": "animals", "target": "fish", "weight": 0.5 },
+    { "source": "fish", "target": "amphibians", "weight": 0.37 },
+    { "source": "amphibians", "target": "reptiles", "weight": 0.31 },
+    { "source": "reptiles", "target": "birds", "weight": 0.15 },
+    { "source": "reptiles", "target": "mammals", "weight": 0.22 }
+  ]
+}

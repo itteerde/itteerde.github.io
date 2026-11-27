@@ -1,7 +1,7 @@
 {
   "theme": "dark",
   "interaction": {
-    "openLinks": "click"
+    "openLinks": "ctrl-click"
   },
   "links": {
     "target": "_self",
