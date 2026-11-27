@@ -1,0 +1,14 @@
+{
+  "theme": "dark",
+  "interaction": {
+    "openLinks": "ctrl-click"
+  },
+  "links": {
+    "target": "_self",
+    "allowAbsolute": true
+  },
+  "camera": {
+    "rotation": "free"
+  },
+  "dimension": "3d"
+}
