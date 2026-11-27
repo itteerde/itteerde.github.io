@@ -5,7 +5,7 @@
   const NAV = [
     ['Home', 'index.html'],
     ['The Party', 'characters/index.html', [['Gial', 'characters/gial.html'], ['Lynyxia', 'characters/lynyxia.html'], ['Hamenja', 'characters/hamenja.html'], ['Rosemary', 'characters/rosemary.html'], ['Alden', 'characters/alden.html']]],
-    ['Journals', 'journals/index.html', [['Lome’s Journal', 'journals/lomes-journal.html']]],
+    ['Journals', 'journals/index.html', [['Gial’s Journal', 'journals/gials-journal.html']]],
     ['Quests', 'quests/index.html', [['Collecting 42 Shark Teeth', 'quests/q_00001.html'], ['Collecting 43 Shark Teeth', 'quests/q_00002.html']]],
     ['Connections', 'connections/index.html', [['All', 'connections/all.html']]],
     ['Characters', 'contacts/index.html', [['Isolde Varrow', 'contacts/c_00001.html']]],
