@@ -1,0 +1,98 @@
+{
+  "format": "graphscape",
+  "version": 1,
+  "directed": false,
+  "meta": {
+    "dimension": "3d",
+    "title": "All"
+  },
+  "nodes": [
+    {
+      "label": "Thistle",
+      "x": -101.20039670339625,
+      "y": 9.201665032865861,
+      "z": 0,
+      "id": "n1",
+      "group": "Party",
+      "color": "#bd0000",
+      "url": "../characters/thistle.html"
+    },
+    {
+      "label": "Enona",
+      "x": -9.999989992670773,
+      "y": 87.06215954040675,
+      "z": 0,
+      "id": "n2",
+      "group": "Party",
+      "color": "#bd0000",
+      "url": "../characters/lome.html"
+    },
+    {
+      "label": "Hannibal",
+      "x": 84.98609928565669,
+      "y": 24.328719285893534,
+      "z": 0,
+      "id": "n3",
+      "group": "Party",
+      "color": "#bd0000",
+      "url": "../characters/hannibal.html"
+    },
+    {
+      "label": "Glafourra",
+      "x": 44.106516998484786,
+      "y": -75.21978137812184,
+      "z": 0,
+      "id": "n4",
+      "group": "Party",
+      "color": "#bd0000",
+      "url": "../characters/glafourra.html"
+    },
+    {
+      "label": "Nyx",
+      "x": -45.739413299535634,
+      "y": -72.5106807878884,
+      "z": 0,
+      "id": "n5",
+      "group": "Party",
+      "color": "#bd0000",
+      "url": "../characters/nyx.html"
+    },
+    {
+      "label": "Party",
+      "x": -0.6284645251953733,
+      "y": 1.0322577914227422,
+      "z": 0,
+      "id": "n6",
+      "group": "Groups",
+      "url": "../characters/index.html",
+      "shape": "diamond"
+    }
+  ],
+  "edges": [
+    {
+      "source": "n2",
+      "target": "n6",
+      "id": "e7"
+    },
+    {
+      "source": "n3",
+      "target": "n6",
+      "id": "e8"
+    },
+    {
+      "source": "n4",
+      "target": "n6",
+      "id": "e9"
+    },
+    {
+      "source": "n5",
+      "target": "n6",
+      "id": "e10"
+    },
+    {
+      "source": "n1",
+      "target": "n6",
+      "id": "e11"
+    }
+  ]
+}

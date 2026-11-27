@@ -7,6 +7,7 @@
     ['The Party', 'characters/index.html', [['Lome', 'characters/lome.html'], ['Hannibal', 'characters/hannibal.html'], ['Glafourra', 'characters/glafourra.html'], ['Thistle', 'characters/thistle.html'], ['Arielle', 'characters/arielle.html'], ['Nyx', 'characters/nyx.html'], ['Caleb', 'characters/caleb.html']]],
     ['Journals', 'journals/index.html', [['Lome’s Journal', 'journals/lomes-journal.html']]],
     ['Quests', 'quests/index.html', [['Collecting 42 Shark Teeth', 'quests/q_00001.html'], ['Collecting 43 Shark Teeth', 'quests/q_00002.html']]],
+    ['Connections', 'connections/index.html', [['All', 'connections/all.html']]],
     ['Characters', 'contacts/index.html', [['Isolde Varrow', 'contacts/c_00001.html']]],
   ];
   const url = h => root + h;
