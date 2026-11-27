@@ -9,9 +9,9 @@
   "nodes": [
     {
       "label": "Gial",
-      "x": -65.12645510839744,
-      "y": 49.61401043102267,
-      "z": 0,
+      "x": 79.91597678151888,
+      "y": -68.49769318901797,
+      "z": 29.811578460483336,
       "group": "Party",
       "url": "../characters/gial.html",
       "color": "#bd0000",
@@ -19,9 +19,9 @@
     },
     {
       "label": "Rosemary",
-      "x": -116.0895258660247,
-      "y": -39.562091639093026,
-      "z": 0,
+      "x": 58.17724055961932,
+      "y": -117.95873214851584,
+      "z": -58.37138089481424,
       "group": "Party",
       "url": "../characters/rosemary.html",
       "color": "#bd0000",
@@ -29,9 +29,9 @@
     },
     {
       "label": "Hamenja",
-      "x": 31.363862776069496,
-      "y": 29.163433704002678,
-      "z": 0,
+      "x": 90.1371705497898,
+      "y": 29.134920362017745,
+      "z": -16.55209676449413,
       "group": "Party",
       "url": "../characters/hamenja.html",
       "color": "#bd0000",
@@ -39,9 +39,9 @@
     },
     {
       "label": "Alden",
-      "x": 46.238947803244756,
-      "y": -67.86467341583194,
-      "z": 0,
+      "x": -11.441397540591439,
+      "y": -49.619802045645464,
+      "z": -142.8171664791711,
       "group": "Party",
       "url": "../characters/alden.html",
       "color": "#bd0000",
@@ -49,9 +49,9 @@
     },
     {
       "label": "Lynyxia",
-      "x": -44.84656272255688,
-      "y": -115.70555534111344,
-      "z": 0,
+      "x": 11.082020393267936,
+      "y": 43.315360926306006,
+      "z": -117.17116209021458,
       "group": "Party",
       "url": "../characters/lynyxia.html",
       "color": "#bd0000",
@@ -59,13 +59,232 @@
     },
     {
       "label": "Party",
-      "x": -30.03129481631828,
-      "y": -27.8097165132994,
-      "z": 0,
+      "x": 17.50622613752062,
+      "y": -26.40580609774608,
+      "z": -43.427169380863845,
       "group": "Groups",
       "url": "../characters/index.html",
       "shape": "diamond",
       "id": "n6"
+    },
+    {
+      "label": "Celsian Athenaeum",
+      "x": -125.63862120343835,
+      "y": 112.38542606731369,
+      "z": 102.98235868395966,
+      "group": "Groups",
+      "url": "../essays/celsian-athenaeum.html",
+      "shape": "diamond",
+      "id": "n7"
+    },
+    {
+      "label": "Sir Jordo Talbus",
+      "x": -88.89686209190421,
+      "y": 111.5874809547888,
+      "z": 215.70682657430183,
+      "group": "Celsian Athenaeum",
+      "color": "#00ff33",
+      "id": "n13"
+    },
+    {
+      "label": "Commander Kieran Tolas",
+      "x": -167.03290610801014,
+      "y": 204.9540294740179,
+      "z": 181.1938676617228,
+      "color": "#00ff33",
+      "id": "n16",
+      "group": "Celsian Athenaeum"
+    },
+    {
+      "label": "Sir Darren Thule",
+      "x": -204.28559857554816,
+      "y": 178.98442444237767,
+      "z": 45.64462768156885,
+      "id": "n18",
+      "group": "Celsian Athenaeum",
+      "color": "#00ff33"
+    },
+    {
+      "label": "Tamsin “Stitch” Corvale",
+      "x": -184.19184219674213,
+      "y": 105.63545587242929,
+      "z": 208.04265199449205,
+      "id": "n20",
+      "group": "Celsian Athenaeum",
+      "color": "#00ff33"
+    },
+    {
+      "label": "Marwen",
+      "x": -241.03721725611481,
+      "y": 152.03813926480257,
+      "z": 132.11705202165115,
+      "id": "n22",
+      "group": "Dead",
+      "color": "#c4c4c4"
+    },
+    {
+      "label": "Council",
+      "x": -123.29526752853283,
+      "y": 223.44680471201184,
+      "z": 146.2162816350611,
+      "id": "n25",
+      "group": "Groups",
+      "shape": "diamond"
+    },
+    {
+      "label": "Arch-Lexicant Seraphel Veyl",
+      "x": -69.9041356821884,
+      "y": 201.65039247422206,
+      "z": 162.37528565329848,
+      "id": "n29",
+      "group": "Celsian Athenaeum",
+      "color": "#00ff33"
+    },
+    {
+      "label": "Thesmar Ilyon",
+      "x": -131.93939893428842,
+      "y": 233.5858356974484,
+      "z": 88.22461063243702,
+      "id": "n31",
+      "group": "Celsian Athenaeum",
+      "color": "#00ff33"
+    },
+    {
+      "label": "Damask Queens",
+      "x": -189.5537171631956,
+      "y": -34.480966502362904,
+      "z": 74.89884279074123,
+      "id": "n37",
+      "group": "Groups",
+      "shape": "diamond"
+    },
+    {
+      "label": "Essenburg",
+      "x": 237.27136145107102,
+      "y": -36.35431692971064,
+      "z": -180.47090534504952,
+      "id": "n39",
+      "group": "Groups",
+      "shape": "diamond"
+    },
+    {
+      "label": "Stella, the Onyx Crown",
+      "x": -290.08873581837827,
+      "y": -58.93004192505458,
+      "z": 124.03222234540078,
+      "id": "n41",
+      "group": "Damask Queens",
+      "color": "#9900ff"
+    },
+    {
+      "label": "Demons",
+      "x": -154.15754931960262,
+      "y": -168.3308908465849,
+      "z": -6.611417221463842,
+      "id": "n43",
+      "group": "Groups",
+      "shape": "diamond"
+    },
+    {
+      "label": "Demon of Avarice",
+      "x": -175.06590881896253,
+      "y": -278.97128102482105,
+      "z": -47.09194898795069,
+      "id": "n44",
+      "group": "Demons",
+      "color": "#9500a8"
+    },
+    {
+      "label": "Demon of Despair",
+      "x": -260.78157640910604,
+      "y": -216.18898673171483,
+      "z": -15.222761271975617,
+      "id": "n45",
+      "group": "Demons",
+      "color": "#9500a8"
+    },
+    {
+      "label": "Demon of Hubris",
+      "x": -136.92000054627312,
+      "y": -271.8628876211368,
+      "z": 34.40771180778067,
+      "id": "n46",
+      "group": "Demons",
+      "color": "#9500a8"
+    },
+    {
+      "label": "Demon of Jealousy",
+      "x": -220.23223302359764,
+      "y": -213.28042888047287,
+      "z": -90.66027811072922,
+      "id": "n47",
+      "group": "Demons",
+      "color": "#9500a8"
+    },
+    {
+      "label": "Demon of Wrath",
+      "x": -214.4052886875262,
+      "y": -246.08460209145065,
+      "z": 55.27328732170113,
+      "id": "n48",
+      "group": "Demons",
+      "color": "#9500a8"
+    },
+    {
+      "label": "Alred Tetzlaff",
+      "x": 255.5292488577138,
+      "y": -68.76588659447722,
+      "z": -294.2780815492556,
+      "id": "n56",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Braka Ludgolghy",
+      "x": 343.55047312777566,
+      "y": -8.441613192510589,
+      "z": -142.7057148369691,
+      "id": "n57",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Durwise Palletbelt",
+      "x": 343.5830304033563,
+      "y": -42.240168621808785,
+      "z": -243.19764305714767,
+      "id": "n58",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Gregor Schultheis",
+      "x": 314.3871466790958,
+      "y": 50.13041633978605,
+      "z": -209.30056500513012,
+      "id": "n59",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Ormia Squigglewander",
+      "x": 261.31857748344754,
+      "y": 21.652546347826863,
+      "z": -279.7228129960022,
+      "id": "n60",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Theran Siegal",
+      "x": 287.5943122688057,
+      "y": -129.3183146359858,
+      "z": -231.3064893273432,
+      "id": "n61",
+      "group": "Essenburg"
+    },
+    {
+      "label": "Wendal Barleywind",
+      "x": 332.23688015458544,
+      "y": -99.43583945372154,
+      "z": -155.0845347744206,
+      "id": "n62",
+      "group": "Essenburg"
     }
   ],
   "edges": [
@@ -93,6 +312,156 @@
       "id": "e11",
       "source": "n1",
       "target": "n6"
+    },
+    {
+      "id": "e12",
+      "source": "n6",
+      "target": "n7",
+      "color": "#00ff11"
+    },
+    {
+      "id": "e15",
+      "source": "n13",
+      "target": "n7"
+    },
+    {
+      "source": "n18",
+      "target": "n7",
+      "id": "e19"
+    },
+    {
+      "source": "n20",
+      "target": "n7",
+      "id": "e21"
+    },
+    {
+      "source": "n22",
+      "target": "n7",
+      "id": "e24"
+    },
+    {
+      "source": "n25",
+      "target": "n7",
+      "id": "e27"
+    },
+    {
+      "source": "n16",
+      "target": "n25",
+      "id": "e28"
+    },
+    {
+      "source": "n29",
+      "target": "n25",
+      "id": "e30"
+    },
+    {
+      "source": "n31",
+      "target": "n25",
+      "id": "e32"
+    },
+    {
+      "source": "n16",
+      "target": "n7",
+      "id": "e34"
+    },
+    {
+      "source": "n29",
+      "target": "n7",
+      "id": "e35"
+    },
+    {
+      "source": "n31",
+      "target": "n7",
+      "id": "e36"
+    },
+    {
+      "source": "n37",
+      "target": "n7",
+      "id": "e38",
+      "color": "#ff0000"
+    },
+    {
+      "source": "n6",
+      "target": "n39",
+      "id": "e40",
+      "label": "exiled"
+    },
+    {
+      "source": "n41",
+      "target": "n37",
+      "id": "e42"
+    },
+    {
+      "source": "n44",
+      "target": "n43",
+      "id": "e49"
+    },
+    {
+      "source": "n46",
+      "target": "n43",
+      "id": "e50"
+    },
+    {
+      "source": "n48",
+      "target": "n43",
+      "id": "e51"
+    },
+    {
+      "source": "n45",
+      "target": "n43",
+      "id": "e52"
+    },
+    {
+      "source": "n47",
+      "target": "n43",
+      "id": "e53"
+    },
+    {
+      "source": "n6",
+      "target": "n43",
+      "id": "e54",
+      "label": "set free"
+    },
+    {
+      "source": "n37",
+      "target": "n43",
+      "id": "e55",
+      "label": "summend"
+    },
+    {
+      "source": "n58",
+      "target": "n39",
+      "id": "e63"
+    },
+    {
+      "source": "n56",
+      "target": "n39",
+      "id": "e64"
+    },
+    {
+      "source": "n57",
+      "target": "n39",
+      "id": "e65"
+    },
+    {
+      "source": "n59",
+      "target": "n39",
+      "id": "e66"
+    },
+    {
+      "source": "n60",
+      "target": "n39",
+      "id": "e67"
+    },
+    {
+      "source": "n62",
+      "target": "n39",
+      "id": "e68"
+    },
+    {
+      "source": "n61",
+      "target": "n39",
+      "id": "e69"
     }
   ]
 }
