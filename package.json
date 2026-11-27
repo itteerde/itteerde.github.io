@@ -2,8 +2,11 @@
   "name": "ws-tools",
   "private": true,
   "scripts": {
-    "search": "pagefind --site AEExport/ws",
-    "preview": "npm run search && npx --yes serve AEExport/ws",
+    "search:site1": "pagefind --site AEExport/ws --output-subdir pagefind",
+    "search:site2": "pagefind --site dh/coa --output-subdir pagefind",
+    "search:site3": "pagefind --site dh/aou --output-subdir pagefind",
+    "search": "npm run search:site1 && npm run search:site2 && npm run search:site3",
+    "preview": "npm run search && npx --yes serve .",
     "graph": "node _src/node/build-graph.mjs",
     "graph:test": "node _src/node/test-graph.mjs",
     "vendor": "node _src/node/vendor-three.mjs"
