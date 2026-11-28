@@ -355,7 +355,8 @@
       "y": -235.7177805669348,
       "z": 119.79175631069592,
       "color": "#d79447",
-      "id": "n27"
+      "id": "n27",
+      "group": "Nowhere"
     },
     {
       "label": "Dr. Senestro Killjoy",
@@ -364,7 +365,8 @@
       "y": -308.51021136222397,
       "z": 95.3692034469078,
       "color": "#d79447",
-      "id": "n28"
+      "id": "n28",
+      "group": "Nowhere"
     },
     {
       "label": "Fomorians",
@@ -430,9 +432,9 @@
     },
     {
       "id": "e27",
+      "weight": 2,
       "source": "n25",
-      "target": "n7",
-      "weight": 2
+      "target": "n7"
     },
     {
       "id": "e28",
