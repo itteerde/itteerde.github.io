@@ -66,6 +66,28 @@ blockquote cite{display:block;font-style:normal;font-size:.9rem;margin-top:.3rem
 .hero p{font-style:italic;color:var(--ink-soft);font-size:1.2rem}
 .prose{max-width:42rem;margin-inline:auto}
 .dropcap>p:first-of-type::first-letter{float:left;font:700 3.8rem/.8 var(--font-head);color:var(--blood);padding:.12em .1em 0 0}
+.footnotes{font-size:smaller;margin-top: 2rem;}
+
+.sheet .prose .footnote-ref {
+  counter-increment: footnote-counter;
+  display: inline;
+  font-size: 0.75rem; /* Use rem instead of em in case parent font-size is 0 */
+  line-height: 1;
+  position: relative;
+  top: -0.45em;
+  padding-left: 2px;
+  text-decoration: none;
+  color: var(--ink); /* Explicitly sets visible ink color */
+}
+
+.sheet .prose .footnote-ref::after {
+  content: "[" counter(footnote-counter) "]" !important;
+  display: inline !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
 
 /* ---- Cards, tags, buttons ---- */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:1.2rem;margin:1.2rem 0;padding:0;list-style:none}
